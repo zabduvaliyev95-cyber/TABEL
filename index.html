@@ -497,8 +497,7 @@
                 { id: '1', username: 'akmal', name: 'Akmal Tursunov', pass: '12345', wage: 444231, isStudent: false, customTime: '09:00' },
                 { id: '2', username: 'sardor', name: 'Sardor Rahimov', pass: '12345', wage: 150000, isStudent: true, customTime: '14:30' }
             ],
-            attendance: initialAttendance,
-            currentUser: null
+            attendance: initialAttendance
         };
 
         let dbState = defaultDb;
@@ -506,7 +505,6 @@
         let managerSelectedEmpId = '1';
         let activeEditingDateStr = '';
 
-        // Firestore real-time listener sync
         const docRef = doc(db, "tabel_system", "main_data");
 
         async function initCloudSync() {
@@ -525,10 +523,22 @@
                     if (data && data.employees) {
                         dbState.employees = data.employees;
                         dbState.attendance = data.attendance || {};
-                        if (dbState.currentUser && dbState.currentUser.role === 'employee') {
-                            const latestEmp = dbState.employees.find(e => e.id === dbState.currentUser.id);
-                            if (latestEmp) dbState.currentUser.name = latestEmp.name;
+                        
+                        // Sync current user session info from employees list
+                        const savedUserStr = localStorage.getItem('tabel_current_user');
+                        if (savedUserStr) {
+                            const current = JSON.parse(savedUserStr);
+                            if (current.role === 'employee') {
+                                const foundEmp = dbState.employees.find(e => e.id === current.id);
+                                if (foundEmp) {
+                                    current.name = foundEmp.name;
+                                    current.username = foundEmp.username;
+                                    localStorage.setItem('tabel_current_user', JSON.stringify(current));
+                                    dbState.currentUser = current;
+                                }
+                            }
                         }
+
                         renderDashboard();
                         renderDavomatTable();
                         if (dbState.currentUser && dbState.currentUser.role === 'manager') {
@@ -550,6 +560,7 @@
                 });
             } catch (err) {
                 console.error("Cloud save error:", err);
+                alert("Internetga ulanishda xatolik yuz berdi. Qaytadan urinib ko'ring!");
             }
         }
 
