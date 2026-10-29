@@ -11,24 +11,19 @@
   <meta name="format-detection" content="telephone=no" />
   <title>Profitcontrol Tabel</title>
   
-  <!-- Иконка приложения (Буква T на темно-синем фоне) -->
+  <!-- Ikonka (T harfi) -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2B4C'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='system-ui,Arial' font-weight='800'%3ET%3C/text%3E%3C/svg%3E" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2B4C'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='system-ui,Arial' font-weight='800'%3ET%3C/text%3E%3C/svg%3E" />
-  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Profitcontrol%20Tabel%22%2C%22short_name%22%3A%22Tabel%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231A2B4C%22%2C%22theme_color%22%3A%22%231A2B4C%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%253E%253Crect%20width%3D'100'%20height%3D'100'%20rx%3D'22'%20fill%3D'%25231A2B4C'%2F%253E%253Ctext%20x%3D'50'%20y%3D'68'%20font-size%3D'55'%20text-anchor%3D'middle'%20fill%3D'white'%20font-family%3D'system-ui'%20font-weight%3D'800'%253ET%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
+  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Profitcontrol%20Tabel%22%2C%22short_name%22%3A%22Tabel%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231A2B4C%22%2C%22theme_color%22%3A%22%231A2B4C%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%253E%253Crect%20width%3D'100'%20height%3D'100'%20rx%3D'22'%20fill%3D'%25231A2B4C'%2F%253E%253Ctext%20x%3D'50'%20y%3D'68'%20font-size%3D'55'%20text-anchor%3D'middle'%20fill%3D'white'%20font-family%3D'system-ui'%20font-weight%3D'800'%253ET%253C%2Ftext%253E%253C%2Fsvg%3E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
 
   <style>
     :root {
       --primary: #1A2B4C;
       --primary-mid: #253A63;
-      --primary-light: #334E82;
       --accent: #0EA5E9;
-      --accent-soft: #E0F2FE;
       --success: #059669;
-      --success-bg: #ECFDF5;
       --danger: #DC2626;
-      --danger-bg: #FEF2F2;
       --warning: #D97706;
-      --warning-bg: #FFFBEB;
       --bg: #F1F5F9;
       --card: #FFFFFF;
       --text: #0F172A;
@@ -40,193 +35,78 @@
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html { height: 100%; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
-      background-image:
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(14,165,233,0.08), transparent),
-        linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
       color: var(--text);
       min-height: 100%;
       min-height: 100dvh;
       padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
     }
     .login-screen {
-      min-height: 100vh;
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background:
-        radial-gradient(ellipse 100% 80% at 50% -30%, rgba(14,165,233,0.18), transparent 60%),
-        linear-gradient(160deg, #1A2B4C 0%, #253A63 45%, #1A2B4C 100%);
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(160deg, #1A2B4C 0%, #253A63 45%, #1A2B4C 100%);
       padding: 24px;
     }
     .login-box {
-      background: rgba(255,255,255,0.97);
-      backdrop-filter: blur(20px);
-      border-radius: 24px;
-      padding: 36px 28px;
-      width: 100%;
-      max-width: 400px;
+      background: rgba(255,255,255,0.97); border-radius: 24px; padding: 36px 28px; width: 100%; max-width: 400px;
       box-shadow: 0 25px 60px rgba(0,0,0,0.35);
     }
     .login-logo {
-      width: 72px; height: 72px;
-      background: linear-gradient(145deg, #1A2B4C, #334E82);
-      border-radius: 18px;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 16px;
-      font-size: 28px; font-weight: 800; color: white;
-      box-shadow: 0 10px 28px rgba(26,43,76,0.35);
+      width: 72px; height: 72px; background: linear-gradient(145deg, #1A2B4C, #334E82);
+      border-radius: 18px; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px; font-size: 28px; font-weight: 800; color: white;
     }
-    .login-title {
-      text-align: center;
-      font-size: 1.45rem;
-      font-weight: 800;
-      margin-bottom: 4px;
-      color: var(--primary);
-    }
-    .login-sub {
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.84rem;
-      margin-bottom: 28px;
-    }
+    .login-title { text-align: center; font-size: 1.45rem; font-weight: 800; margin-bottom: 4px; color: var(--primary); }
+    .login-sub { text-align: center; color: var(--muted); font-size: 0.84rem; margin-bottom: 28px; }
     .form-group { margin-bottom: 16px; }
-    .form-group label {
-      display: block;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--muted);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-    }
-    input, select {
-      width: 100%;
-      padding: 14px 16px;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      font-size: 1rem;
-      background: #F8FAFC;
-      color: var(--text);
-    }
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--accent);
-      background: white;
-      box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
-    }
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 14px 22px; border: none; border-radius: 12px;
-      font-size: 1rem; font-weight: 600; cursor: pointer;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #1A2B4C, #334E82);
-      color: white; width: 100%;
-      box-shadow: 0 4px 14px rgba(26,43,76,0.3);
-    }
-    .btn-keldim {
-      background: linear-gradient(135deg, #047857, #059669);
-      color: white; width: 100%;
-      padding: 18px 22px; font-size: 1.12rem; font-weight: 700;
-      border-radius: 14px;
-      box-shadow: 0 6px 20px rgba(5,150,105,0.35);
-    }
+    .form-group label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; }
+    input, select { width: 100%; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 1rem; background: #F8FAFC; color: var(--text); }
+    input:focus, select:focus { outline: none; border-color: var(--accent); background: white; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 22px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .btn-primary { background: linear-gradient(135deg, #1A2B4C, #334E82); color: white; width: 100%; }
+    .btn-keldim { background: linear-gradient(135deg, #047857, #059669); color: white; width: 100%; padding: 18px; font-size: 1.12rem; font-weight: 700; border-radius: 14px; }
     .error-msg { color: var(--danger); font-size: 0.85rem; text-align: center; margin-top: 12px; display: none; }
-    .header {
-      background: linear-gradient(135deg, #1A2B4C 0%, #253A63 100%);
-      color: white; padding: 16px 18px 14px;
-      position: sticky; top: 0; z-index: 100;
-      box-shadow: 0 4px 20px rgba(26,43,76,0.25);
-    }
+    .header { background: linear-gradient(135deg, #1A2B4C 0%, #253A63 100%); color: white; padding: 16px 18px; position: sticky; top: 0; z-index: 100; }
     .header-top { display: flex; justify-content: space-between; align-items: center; }
     .header h1 { font-size: 1.22rem; font-weight: 800; }
-    .header .user-info { font-size: 0.78rem; opacity: 0.9; margin-top: 2px; }
-    .logout-btn {
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: white; padding: 8px 14px; border-radius: 10px;
-      font-size: 0.8rem; font-weight: 600; cursor: pointer;
-    }
-    .card {
-      background: var(--card); border-radius: var(--radius);
-      box-shadow: var(--shadow); padding: 18px; margin-bottom: 14px;
-      border: 1px solid rgba(226,232,240,0.9);
-    }
+    .logout-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; margin-bottom: 14px; border: 1px solid var(--border); }
     .card-title { font-size: 0.92rem; font-weight: 700; color: var(--primary); margin-bottom: 14px; }
-    .nav {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: rgba(255,255,255,0.92); backdrop-filter: blur(16px);
-      display: flex; border-top: 1px solid var(--border); z-index: 100;
-    }
-    .nav-item {
-      flex: 1; text-align: center; padding: 10px 4px 8px;
-      font-size: 0.68rem; color: var(--muted); cursor: pointer; font-weight: 500;
-    }
+    .nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); display: flex; border-top: 1px solid var(--border); z-index: 100; }
+    .nav-item { flex: 1; text-align: center; padding: 10px 4px 8px; font-size: 0.68rem; color: var(--muted); cursor: pointer; font-weight: 500; }
     .nav-item.active { color: var(--primary); font-weight: 700; }
     .nav-item .icon { font-size: 1.35rem; display: block; margin-bottom: 2px; }
-    .page { display: none; }
-    .page.active { display: block; }
-    .emp-item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 0; border-bottom: 1px solid #f1f5f9;
-    }
+    .page { display: none; } .page.active { display: block; }
+    .emp-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
     .emp-name { font-weight: 700; font-size: 0.95rem; }
     .emp-salary { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
     .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
     .badge-success { background: #D1FAE5; color: #065F46; }
     .badge-warning { background: #FEF3C7; color: #92400E; }
-    .badge-danger { background: #FEE2E2; color: #991B1B; }
     .badge-muted { background: #F1F5F9; color: #475569; }
     .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .stat-box {
-      background: #FFFFFF; border-radius: 14px; padding: 16px; text-align: center;
-      border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(15,23,42,0.03);
-    }
+    .stat-box { background: #FFFFFF; border-radius: 14px; padding: 16px; text-align: center; border: 1px solid var(--border); }
     .stat-box .value { font-size: 1.22rem; font-weight: 800; color: var(--primary); }
     .stat-box .label { font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
-    .day-card {
-      background: white; border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
-      border-left: 4px solid var(--primary); box-shadow: var(--shadow); cursor: pointer;
-      border: 1px solid rgba(226,232,240,0.7); border-left-width: 4px;
-    }
+    .day-card { background: white; border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; border-left: 4px solid var(--primary); box-shadow: var(--shadow); cursor: pointer; border: 1px solid var(--border); border-left-width: 4px; }
+    .day-card.weekend { border-left-color: #94A3B8; opacity: 0.85; background: #F8FAFC; }
     .day-header { display: flex; justify-content: space-between; align-items: center; }
     .day-date { font-weight: 700; font-size: 0.95rem; }
     .day-week { font-size: 0.8rem; color: var(--muted); }
-    .toast {
-      position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
-      background: #1E293B; color: white; padding: 12px 24px; border-radius: 30px;
-      font-size: 0.9rem; z-index: 999; opacity: 0; transition: 0.3s; pointer-events: none;
-    }
+    .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.9rem; z-index: 999; opacity: 0; transition: 0.3s; pointer-events: none; }
     .toast.show { opacity: 1; }
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(15,23,42,0.55);
-      backdrop-filter: blur(6px); z-index: 200; display: none;
-      align-items: flex-end; justify-content: center;
-    }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.55); backdrop-filter: blur(6px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
     .modal-overlay.show { display: flex; }
-    .modal {
-      background: white; width: 100%; max-width: 500px;
-      border-radius: 24px 24px 0 0; padding: 22px 18px 36px; max-height: 92vh; overflow-y: auto;
-    }
+    .modal { background: white; width: 100%; max-width: 500px; border-radius: 24px 24px 0 0; padding: 22px 18px 36px; max-height: 92vh; overflow-y: auto; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
     .close-btn { background: #F1F5F9; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1.35rem; cursor: pointer; color: var(--muted); }
-    .rules-box {
-      background: linear-gradient(135deg, #FFFBEB, #FEF3C7); border-left: 4px solid var(--warning);
-      padding: 14px 16px; border-radius: 0 14px 14px 0; font-size: 0.84rem; line-height: 1.6; margin-bottom: 14px;
-    }
+    .rules-box { background: linear-gradient(135deg, #FFFBEB, #FEF3C7); border-left: 4px solid var(--warning); padding: 14px 16px; border-radius: 0 14px 14px 0; font-size: 0.84rem; line-height: 1.6; margin-bottom: 14px; }
     .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
     .row { display: flex; gap: 10px; } .row > * { flex: 1; }
     .hidden { display: none !important; }
     .sync-status { font-size: 0.7rem; opacity: 0.85; margin-top: 3px; }
-    .sync-online { color: #86EFAC; }
-    .sync-offline { color: #FCA5A5; }
-    .time-display {
-      text-align: center; padding: 20px 16px; background: #ECFDF5;
-      border-radius: 14px; margin-bottom: 14px; border: 2px solid #A7F3D0;
-    }
+    .sync-online { color: #86EFAC; } .sync-offline { color: #FCA5A5; }
+    .time-display { text-align: center; padding: 20px 16px; background: #ECFDF5; border-radius: 14px; margin-bottom: 14px; border: 2px solid #A7F3D0; }
     .time-display .time-value { font-size: 2rem; font-weight: 800; color: #065F46; }
     .time-display .time-label { font-size: 0.8rem; color: #047857; margin-top: 4px; font-weight: 600; }
     .time-display.locked { background: #F0F9FF; border-color: #BAE6FD; }
@@ -301,7 +181,7 @@
     <div class="page" id="page-days">
       <div class="container">
         <div class="card">
-          <div class="card-title">📅 Kunlar ro‘yxati</div>
+          <div class="card-title">📅 Kunlar ro‘yxati (Faqat yakshanba dam olish)</div>
           <div id="daysList"></div>
         </div>
       </div>
@@ -363,7 +243,7 @@
       authDomain: "ishtabel-d4326.firebaseapp.com",
       databaseURL: "https://ishtabel-d4326-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "ishtabel-d4326",
-      storageBucket: "ishtabel-d4326.firebasestorage.app",
+      storageBucket: "ishtabel-d4326.appspot.com",
       messagingSenderId: "595716146339",
       appId: "1:595716146339:web:ce135e1410383e4c5f2b16"
     };
@@ -519,6 +399,8 @@
     }
 
     function formatMoney(n) { return new Intl.NumberFormat("uz-UZ").format(Math.round(n || 0)) + " so‘m"; }
+    
+    // Faqat yakshanba (day === 0) dam olish kuni bo'lishi uchun to'g'irlandi
     function workDaysInMonth(month) {
       const dim = daysInMonth(month);
       let count = 0;
@@ -527,10 +409,12 @@
       }
       return count;
     }
+
     function dailyRate(emp, month) {
       const wd = workDaysInMonth(month || currentMonth);
       return wd > 0 ? (emp.salary || 0) / wd : 0;
     }
+
     function calcDayPenalty(timeStr, daily, isAbsent, forma, telefon) {
       if (isAbsent || !timeStr) return Math.round(daily);
       const parts = timeStr.split(":").map(Number);
@@ -543,9 +427,11 @@
       if (telefon) penalty += daily / 3;
       return Math.min(Math.round(daily), Math.round(penalty));
     }
+
     function calcPay(timeStr, daily, isAbsent, forma, telefon) {
       return Math.max(0, Math.round(daily - calcDayPenalty(timeStr, daily, isAbsent, forma, telefon)));
     }
+
     function getMonthStats(emp, month = currentMonth) {
       const dim = daysInMonth(month);
       const key = monthKey(month);
@@ -554,7 +440,7 @@
       const daily = dailyRate(emp, month);
       let totalPenalty = 0, daysPresent = 0;
       for (let d = 1; d <= dim; d++) {
-        if (new Date(YEAR, month - 1, d).getDay() === 0) continue;
+        if (new Date(YEAR, month - 1, d).getDay() === 0) continue; // Faqat yakshanba dam olish
         const now = new Date();
         if (month === (now.getMonth() + 1) && d > now.getDate()) continue;
         const rec = (monthAtt[d] || {})[emp.id];
@@ -567,6 +453,7 @@
       }
       return { paid: Math.max(0, salary - Math.round(totalPenalty)), penalty: Math.round(totalPenalty), salary, daily: Math.round(daily), daysPresent };
     }
+
     function formatTimeFull(timeStr) { return timeStr ? (timeStr.split(":").length === 2 ? timeStr + ":00" : timeStr) : "—"; }
     function getNowTimeString() {
       const now = new Date();
@@ -589,6 +476,7 @@
       if (name === "report") renderReport();
       if (name === "settings") renderSettings();
     }
+
     function renderHome() {
       fillMonthSelect();
       const emps = currentUser.role === "admin" ? state.employees : state.employees.filter(e => e.id === currentUser.empId);
@@ -612,6 +500,7 @@
         document.getElementById("empList").innerHTML = html || "<div class='empty-state'>Xodimlar yo‘q</div>";
       }
     }
+
     function renderDays() {
       fillMonthSelect();
       const dim = daysInMonth(currentMonth);
@@ -621,13 +510,19 @@
       let html = `<div style="margin-bottom:12px;font-weight:700;color:var(--primary)">${UZ_MONTHS[currentMonth]} ${YEAR}</div>`;
       for (let d = 1; d <= dim; d++) {
         const wd = new Date(YEAR, currentMonth - 1, d).getDay();
+        const isSunday = (wd === 0);
         const att = monthAtt[d] || {};
         const filled = isAdmin ? Object.keys(att).length : (att[currentUser.empId] ? 1 : 0);
-        const today = isToday(d);
-        html += `<div class="day-card" onclick="openDayModal(${d})"><div class="day-header"><div><span class="day-date">${d}-${UZ_MONTHS[currentMonth].toLowerCase()}</span><span class="day-week"> • ${UZ_WEEKDAYS[wd]}</span></div><span class="badge ${filled ? 'badge-success' : 'badge-muted'}">${filled ? "to‘ldirilgan" : "bo‘sh"}</span></div></div>`;
+        
+        if (isSunday) {
+          html += `<div class="day-card weekend"><div class="day-header"><div><span class="day-date">${d}-${UZ_MONTHS[currentMonth].toLowerCase()}</span><span class="day-week"> • ${UZ_WEEKDAYS[wd]}</span></div><span class="badge badge-muted">Dam olish kuni</span></div></div>`;
+        } else {
+          html += `<div class="day-card" onclick="openDayModal(${d})"><div class="day-header"><div><span class="day-date">${d}-${UZ_MONTHS[currentMonth].toLowerCase()}</span><span class="day-week"> • ${UZ_WEEKDAYS[wd]}</span></div><span class="badge ${filled ? 'badge-success' : 'badge-muted'}">${filled ? "to‘ldirilgan" : "bo‘sh"}</span></div></div>`;
+        }
       }
       document.getElementById("daysList").innerHTML = html;
     }
+
     function renderReport() {
       fillMonthSelect();
       const emps = currentUser.role === "admin" ? state.employees : state.employees.filter(e => e.id === currentUser.empId);
@@ -642,6 +537,7 @@
         document.getElementById("reportTotal").innerHTML = `<div class="emp-item"><div class="emp-name">Jami to‘lov</div><div class="money-green">${formatMoney(grandPaid)}</div></div>`;
       }
     }
+
     function renderSettings() {
       if (currentUser.role !== "admin") return;
       let html = "";
@@ -650,8 +546,14 @@
       });
       document.getElementById("settingsEmpList").innerHTML = html;
     }
+
     let currentDay = 1;
     function openDayModal(day) {
+      const wd = new Date(YEAR, currentMonth - 1, day).getDay();
+      if (wd === 0) {
+        toast("Yakshanba — dam olish kuni!");
+        return;
+      }
       currentDay = day;
       const key = monthKey();
       const att = (state.attendance[key] || {})[day] || {};
@@ -673,6 +575,7 @@
       document.getElementById("adminSaveBtn").style.display = currentUser.role === "admin" ? "block" : "none";
       document.getElementById("dayModal").classList.add("show");
     }
+
     function closeDayModal() { document.getElementById("dayModal").classList.remove("show"); }
     function pressKeldim(empId) {
       const key = monthKey();
@@ -689,6 +592,7 @@
       closeDayModal();
       renderHome();
     }
+
     function saveDayAdmin() {
       const key = monthKey();
       if (!state.attendance[key]) state.attendance[key] = {};
@@ -704,10 +608,12 @@
       toast("Saqlandi ✓");
       renderHome();
     }
+
     function updateEmp(idx, field, value) {
       state.employees[idx][field] = field === "salary" ? parseInt(value) || 0 : value;
       saveState();
     }
+
     function addEmployee() {
       const id = Date.now();
       const login = "ishchi" + id.toString().slice(-4);
@@ -716,9 +622,11 @@
       saveState();
       renderSettings();
     }
+
     function clearAttendance() {
       if (confirm("Tozalansinmi?")) { state.attendance = {}; saveState(); renderHome(); }
     }
+
     initFirebase();
     loadState();
   </script>
