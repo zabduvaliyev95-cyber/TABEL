@@ -63,6 +63,7 @@
     input:focus, select:focus { outline: none; border-color: var(--accent); background: white; }
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 22px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; }
     .btn-primary { background: linear-gradient(135deg, #1A2B4C, #334E82); color: white; width: 100%; }
+    .btn-excel { background: linear-gradient(135deg, #059669, #047857); color: white; width: 100%; margin-top: 10px; }
     .btn-keldim { background: linear-gradient(135deg, #047857, #059669); color: white; width: 100%; padding: 18px; font-size: 1.12rem; font-weight: 700; border-radius: 14px; }
     .error-msg { color: var(--danger); font-size: 0.85rem; text-align: center; margin-top: 12px; display: none; }
     .header { background: linear-gradient(135deg, #1A2B4C 0%, #253A63 100%); color: white; padding: 16px 18px; position: sticky; top: 0; z-index: 100; }
@@ -94,27 +95,12 @@
       gap: 8px;
       margin-top: 10px;
     }
-    .cal-header-cell {
-      text-align: center;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--muted);
-      padding-bottom: 6px;
-    }
+    .cal-header-cell { text-align: center; font-size: 0.78rem; font-weight: 700; color: var(--muted); padding-bottom: 6px; }
     .cal-header-cell:first-child { color: var(--danger); }
-    
     .day-cell {
-      background: white;
-      border-radius: 12px;
-      padding: 10px 4px;
-      text-align: center;
-      border: 1px solid var(--border);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-      cursor: pointer;
-      min-height: 64px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      background: white; border-radius: 12px; padding: 10px 4px; text-align: center;
+      border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.02); cursor: pointer;
+      min-height: 64px; display: flex; flex-direction: column; justify-content: space-between;
     }
     .day-cell.empty { background: transparent; border: none; box-shadow: none; cursor: default; }
     .day-cell.weekend { background: #F8FAFC; border-color: #E2E8F0; opacity: 0.8; cursor: default; }
@@ -131,7 +117,7 @@
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
     .close-btn { background: #F1F5F9; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1.35rem; cursor: pointer; color: var(--muted); }
     .rules-box { background: linear-gradient(135deg, #FFFBEB, #FEF3C7); border-left: 4px solid var(--warning); padding: 14px 16px; border-radius: 0 14px 14px 0; font-size: 0.84rem; line-height: 1.6; margin-bottom: 14px; }
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .empty-state { text-align: center; padding: 20px; color: var(--muted); font-size: 0.88rem; }
     .row { display: flex; gap: 10px; } .row > * { flex: 1; }
     .hidden { display: none !important; }
     .sync-status { font-size: 0.7rem; opacity: 0.85; margin-top: 3px; }
@@ -144,6 +130,8 @@
     .container { padding: 16px; max-width: 640px; margin: 0 auto; width: 100%; }
     .money-green { color: var(--success); font-weight: 700; }
     .money-red { color: var(--danger); font-weight: 700; }
+    .money-orange { color: var(--warning); font-weight: 700; }
+    .history-item { background: #F8FAFC; border-radius: 10px; padding: 10px; margin-bottom: 8px; border: 1px solid var(--border); font-size: 0.82rem; }
   </style>
 </head>
 <body>
@@ -220,12 +208,22 @@
     <div class="page" id="page-report">
       <div class="container">
         <div class="card">
-          <div class="card-title">📊 Oylik hisobot</div>
+          <div class="card-title">📊 Oylik hisobot va Avanslar</div>
           <div id="reportList"></div>
+          <button class="btn btn-excel" id="excelBtn" onclick="exportToExcel()">📥 Excel hisobotni yuklab olish</button>
         </div>
         <div class="card" id="reportTotalCard">
-          <div class="card-title">💰 Umumiy</div>
+          <div class="card-title">💰 Jami Ish Haqi Fondi</div>
           <div id="reportTotal"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-history">
+      <div class="container">
+        <div class="card">
+          <div class="card-title">📜 Kechikish va Jarimalar Tarixi</div>
+          <div id="historyList"></div>
         </div>
       </div>
     </div>
@@ -233,13 +231,13 @@
     <div class="page" id="page-settings">
       <div class="container">
         <div class="card" id="adminEmpCard">
-          <div class="card-title">👥 Xodimlar va loginlar (menejer)</div>
+          <div class="card-title">👥 Xodimlar va Avans kiritish (menejer)</div>
           <div id="settingsEmpList"></div>
-          <button class="btn btn-outline btn-block" style="margin-top:12px" onclick="addEmployee()">+ Yangi xodim qo‘shish</button>
+          <button class="btn btn-primary" style="margin-top:12px;width:100%" onclick="addEmployee()">+ Yangi xodim qo‘shish</button>
         </div>
         <div class="card">
           <div class="card-title">🗑 Ma’lumotlarni tozalash</div>
-          <button class="btn btn-danger btn-block" onclick="clearAttendance()">Davomatni tozalash</button>
+          <button class="btn btn-primary" style="background:var(--danger);width:100%" onclick="clearAttendance()">Davomatni tozalash</button>
         </div>
       </div>
     </div>
@@ -248,6 +246,7 @@
       <div class="nav-item active" data-page="home" onclick="showPage('home')"><span class="icon">🏠</span>Bosh sahifa</div>
       <div class="nav-item" data-page="days" onclick="showPage('days')"><span class="icon">📅</span>Kunlar</div>
       <div class="nav-item" data-page="report" onclick="showPage('report')"><span class="icon">📊</span>Hisobot</div>
+      <div class="nav-item" data-page="history" onclick="showPage('history')"><span class="icon">📜</span>Tarix</div>
       <div class="nav-item" data-page="settings" onclick="showPage('settings')" id="navSettings"><span class="icon">⚙️</span>Sozlama</div>
     </div>
   </div>
@@ -259,7 +258,7 @@
         <button class="close-btn" onclick="closeDayModal()">×</button>
       </div>
       <div id="modalBody"></div>
-      <button class="btn btn-success btn-block" style="margin-top:16px;display:none" id="adminSaveBtn" onclick="saveDayAdmin()">💾 Saqlash</button>
+      <button class="btn btn-keldim" style="margin-top:16px;display:none;background:var(--primary)" id="adminSaveBtn" onclick="saveDayAdmin()">💾 Saqlash</button>
     </div>
   </div>
 
@@ -302,6 +301,7 @@
       if (document.getElementById("page-home").classList.contains("active")) renderHome();
       if (document.getElementById("page-days").classList.contains("active")) renderDays();
       if (document.getElementById("page-report").classList.contains("active")) renderReport();
+      if (document.getElementById("page-history").classList.contains("active")) renderHistory();
     }
 
     function openToday() {
@@ -309,11 +309,6 @@
       currentMonth = now.getMonth() + 1;
       fillMonthSelect();
       openDayModal(now.getDate());
-    }
-
-    function isToday(day, month = currentMonth) {
-      const now = new Date();
-      return (now.getMonth() + 1) === month && now.getDate() === day;
     }
 
     const DEFAULT_USERS = {
@@ -331,7 +326,7 @@
       employees.forEach(e => {
         users[e.login] = { password: e.password, role: "employee", name: e.name, empId: e.id };
       });
-      return { employees, attendance: {}, workDays: 25, users, notifications: [] };
+      return { employees, attendance: {}, advances: {}, workDays: 25, users };
     }
 
     let state = createDefaultState();
@@ -368,24 +363,26 @@
             if (!state.users) state.users = {};
             if (!state.employees) state.employees = [];
             if (!state.attendance) state.attendance = {};
+            if (!state.advances) state.advances = {};
             setSyncStatus(true, "Onlayn • Sinxronlangan");
             if (currentUser) {
               if (document.getElementById("page-home").classList.contains("active")) renderHome();
               if (document.getElementById("page-days").classList.contains("active")) renderDays();
               if (document.getElementById("page-report").classList.contains("active")) renderReport();
+              if (document.getElementById("page-history").classList.contains("active")) renderHistory();
               if (document.getElementById("page-settings").classList.contains("active")) renderSettings();
             }
           }
         });
       } else {
-        const saved = localStorage.getItem("ish_tabeli_v3");
+        const saved = localStorage.getItem("ish_tabeli_v4");
         if (saved) state = JSON.parse(saved);
         else state = createDefaultState();
       }
     }
 
     function saveState() {
-      localStorage.setItem("ish_tabeli_v3", JSON.stringify(state));
+      localStorage.setItem("ish_tabeli_v4", JSON.stringify(state));
       if (isFirebaseReady && db) db.ref("ish_tabeli").set(state);
     }
 
@@ -415,6 +412,7 @@
       document.getElementById("navSettings").style.display = isAdmin ? "block" : "none";
       document.getElementById("homeEmpCard").style.display = isAdmin ? "block" : "none";
       document.getElementById("reportTotalCard").style.display = isAdmin ? "block" : "none";
+      document.getElementById("excelBtn").style.display = isAdmin ? "block" : "none";
 
       showPage("home");
     }
@@ -433,8 +431,7 @@
       const dim = daysInMonth(month);
       let count = 0;
       for (let d = 1; d <= dim; d++) {
-        const jsDay = new Date(YEAR, month - 1, d).getDay();
-        if (jsDay !== 0) count++;
+        if (new Date(YEAR, month - 1, d).getDay() !== 0) count++;
       }
       return count;
     }
@@ -457,10 +454,6 @@
       return Math.min(Math.round(daily), Math.round(penalty));
     }
 
-    function calcPay(timeStr, daily, isAbsent, forma, telefon) {
-      return Math.max(0, Math.round(daily - calcDayPenalty(timeStr, daily, isAbsent, forma, telefon)));
-    }
-
     function getMonthStats(emp, month = currentMonth) {
       const dim = daysInMonth(month);
       const key = monthKey(month);
@@ -481,7 +474,11 @@
           daysPresent++;
         }
       }
-      return { paid: Math.max(0, salary - Math.round(totalPenalty)), penalty: Math.round(totalPenalty), salary, daily: Math.round(daily), daysPresent };
+      const advance = (state.advances && state.advances[key] && state.advances[key][emp.id]) || 0;
+      const calculatedPay = Math.max(0, salary - Math.round(totalPenalty));
+      const finalHandPay = Math.max(0, calculatedPay - advance);
+
+      return { paid: calculatedPay, handPay: finalHandPay, advance, penalty: Math.round(totalPenalty), salary, daily: Math.round(daily), daysPresent };
     }
 
     function formatTimeFull(timeStr) { return timeStr ? (timeStr.split(":").length === 2 ? timeStr + ":00" : timeStr) : "—"; }
@@ -504,6 +501,7 @@
       if (name === "home") renderHome();
       if (name === "days") renderDays();
       if (name === "report") renderReport();
+      if (name === "history") renderHistory();
       if (name === "settings") renderSettings();
     }
 
@@ -513,19 +511,19 @@
       let totalPaid = 0, totalPenalty = 0;
       emps.forEach(emp => {
         const st = getMonthStats(emp);
-        totalPaid += st.paid; totalPenalty += st.penalty;
+        totalPaid += st.handPay; totalPenalty += st.penalty;
       });
       document.getElementById("summaryGrid").innerHTML = `
         <div class="stat-box"><div class="value">${daysInMonth(currentMonth)}</div><div class="label">Oy kunlari</div></div>
         <div class="stat-box"><div class="value">${workDaysInMonth(currentMonth)}</div><div class="label">Ish kunlari</div></div>
-        <div class="stat-box"><div class="value money-green" style="font-size:1rem">${formatMoney(totalPaid)}</div><div class="label">Hisob</div></div>
-        <div class="stat-box"><div class="value money-red" style="font-size:1rem">${formatMoney(totalPenalty)}</div><div class="label">Jarima</div></div>
+        <div class="stat-box"><div class="value money-green" style="font-size:0.95rem">${formatMoney(totalPaid)}</div><div class="label">Qolgan Maosh</div></div>
+        <div class="stat-box"><div class="value money-red" style="font-size:0.95rem">${formatMoney(totalPenalty)}</div><div class="label">Jarima</div></div>
       `;
       if (currentUser.role === "admin") {
         let html = "";
         state.employees.forEach(emp => {
           const st = getMonthStats(emp);
-          html += `<div class="emp-item"><div><div class="emp-name">${emp.name}</div><div class="emp-salary">Oylik: ${formatMoney(st.salary)}</div></div><div style="text-align:right"><div class="money-green">${formatMoney(st.paid)}</div><div class="money-red" style="font-size:0.78rem">−${formatMoney(st.penalty)}</div></div></div>`;
+          html += `<div class="emp-item"><div><div class="emp-name">${emp.name}</div><div class="emp-salary">Oylik: ${formatMoney(st.salary)}</div></div><div style="text-align:right"><div class="money-green">${formatMoney(st.handPay)}</div><div class="money-red" style="font-size:0.75rem">−${formatMoney(st.penalty)} jarima</div></div></div>`;
         });
         document.getElementById("empList").innerHTML = html || "<div class='empty-state'>Xodimlar yo‘q</div>";
       }
@@ -542,42 +540,26 @@
       html += `<div class="calendar-grid">`;
       
       const weekNames = ["Yak", "Dus", "Ses", "Cho", "Pay", "Jum", "Sha"];
-      weekNames.forEach(w => {
-        html += `<div class="cal-header-cell">${w}</div>`;
-      });
+      weekNames.forEach(w => { html += `<div class="cal-header-cell">${w}</div>`; });
       
       const firstDayIndex = new Date(YEAR, currentMonth - 1, 1).getDay();
-      
-      for (let i = 0; i < firstDayIndex; i++) {
-        html += `<div class="day-cell empty"></div>`;
-      }
+      for (let i = 0; i < firstDayIndex; i++) { html += `<div class="day-cell empty"></div>`; }
       
       for (let d = 1; d <= dim; d++) {
-        const dateObj = new Date(YEAR, currentMonth - 1, d);
-        const jsDay = dateObj.getDay();
+        const jsDay = new Date(YEAR, currentMonth - 1, d).getDay();
         const isSunday = (jsDay === 0);
         const att = monthAtt[d] || {};
         const filled = isAdmin ? Object.keys(att).length : (att[currentUser.empId] ? 1 : 0);
         
         if (isSunday) {
-          html += `<div class="day-cell weekend">
-            <div class="day-num">${d}</div>
-            <div class="day-status">Dam</div>
-          </div>`;
+          html += `<div class="day-cell weekend"><div class="day-num">${d}</div><div class="day-status">Dam</div></div>`;
         } else {
           let statusText = "Kiritilmagan";
           let cellClass = "day-cell";
-          if (filled) {
-            statusText = "Kiritilgan";
-            cellClass += " filled";
-          }
-          html += `<div class="${cellClass}" onclick="openDayModal(${d})">
-            <div class="day-num">${d}</div>
-            <div class="day-status">${statusText}</div>
-          </div>`;
+          if (filled) { statusText = "Kiritilgan"; cellClass += " filled"; }
+          html += `<div class="${cellClass}" onclick="openDayModal(${d})"><div class="day-num">${d}</div><div class="day-status">${statusText}</div></div>`;
         }
       }
-      
       html += `</div>`;
       document.getElementById("daysList").innerHTML = html;
     }
@@ -585,34 +567,122 @@
     function renderReport() {
       fillMonthSelect();
       const emps = currentUser.role === "admin" ? state.employees : state.employees.filter(e => e.id === currentUser.empId);
-      let html = "", grandPaid = 0, grandPenalty = 0, grandSalary = 0;
+      let html = "", grandHandPay = 0;
       emps.forEach(emp => {
         const st = getMonthStats(emp);
-        grandPaid += st.paid; grandPenalty += st.penalty; grandSalary += st.salary;
-        html += `<div class="emp-item"><div><div class="emp-name">${emp.name}</div><div class="emp-salary">${formatMoney(st.salary)}</div></div><div style="text-align:right"><div class="money-green">${formatMoney(st.paid)}</div><div class="money-red">−${formatMoney(st.penalty)}</div></div></div>`;
+        grandHandPay += st.handPay;
+        html += `<div class="emp-item">
+          <div>
+            <div class="emp-name">${emp.name}</div>
+            <div class="emp-salary">Oylik: ${formatMoney(st.salary)}</div>
+            ${st.advance > 0 ? `<div class="money-orange" style="font-size:0.75rem">Avans: ${formatMoney(st.advance)}</div>` : ''}
+          </div>
+          <div style="text-align:right">
+            <div class="money-green" style="font-size:0.95rem">Qo‘lga: ${formatMoney(st.handPay)}</div>
+            <div class="money-red" style="font-size:0.75rem">Jarima: −${formatMoney(st.penalty)}</div>
+          </div>
+        </div>`;
       });
-      document.getElementById("reportList").innerHTML = html;
+      document.getElementById("reportList").innerHTML = html || "<div class='empty-state'>Ma'lumot topilmadi</div>";
       if (currentUser.role === "admin") {
-        document.getElementById("reportTotal").innerHTML = `<div class="emp-item"><div class="emp-name">Jami to‘lov</div><div class="money-green">${formatMoney(grandPaid)}</div></div>`;
+        document.getElementById("reportTotal").innerHTML = `<div class="emp-item"><div class="emp-name">Jami beriladigan maosh</div><div class="money-green" style="font-size:1.1rem">${formatMoney(grandHandPay)}</div></div>`;
       }
+    }
+
+    function renderHistory() {
+      fillMonthSelect();
+      const key = monthKey();
+      const monthAtt = state.attendance[key] || {};
+      const dim = daysInMonth(currentMonth);
+      let html = "";
+      let count = 0;
+
+      for (let d = dim; d >= 1; d--) {
+        const jsDay = new Date(YEAR, currentMonth - 1, d).getDay();
+        if (jsDay === 0) continue;
+        const dayAtt = monthAtt[d];
+        if (!dayAtt) continue;
+
+        const emps = currentUser.role === "admin" ? state.employees : state.employees.filter(e => e.id === currentUser.empId);
+        emps.forEach(emp => {
+          const rec = dayAtt[emp.id];
+          if (!rec) return;
+          
+          let issues = [];
+          if (rec.time) {
+            const parts = rec.time.split(":").map(Number);
+            const mins = parts[0] * 60 + parts[1];
+            if (mins > 9 * 60 + 20) issues.push(`⏰ Kechikish: ${rec.time}`);
+          }
+          if (rec.forma === false) issues.push("👔 Forma kiymagan");
+          if (rec.telefon) issues.push("📱 Telefon ishlatgan");
+
+          if (issues.length > 0) {
+            count++;
+            html += `<div class="history-item">
+              <div style="display:flex;justify-content:space-between;font-weight:700">
+                <span>${emp.name}</span>
+                <span>${d}-${UZ_MONTHS[currentMonth]}</span>
+              </div>
+              <div style="color:var(--danger);margin-top:4px">${issues.join(" • ")}</div>
+            </div>`;
+          }
+        });
+      }
+
+      document.getElementById("historyList").innerHTML = html || "<div class='empty-state'>Ushbu oyda hech qanday kechikish va jarimalar mavjud emas 🎉</div>";
     }
 
     function renderSettings() {
       if (currentUser.role !== "admin") return;
+      const key = monthKey();
+      if (!state.advances) state.advances = {};
+      if (!state.advances[key]) state.advances[key] = {};
+
       let html = "";
       state.employees.forEach((emp, idx) => {
-        html += `<div style="margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid #E2E8F0"><div class="form-group"><label>Ism</label><input type="text" value="${emp.name}" onchange="updateEmp(${idx},'name',this.value)" /></div><div class="form-group"><label>Oylik</label><input type="number" value="${emp.salary}" onchange="updateEmp(${idx},'salary',this.value)" /></div></div>`;
+        const advVal = state.advances[key][emp.id] || 0;
+        html += `<div style="margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid #E2E8F0">
+          <div class="form-group"><label>Xodim Ismi</label><input type="text" value="${emp.name}" onchange="updateEmp(${idx},'name',this.value)" /></div>
+          <div class="row">
+            <div class="form-group"><label>Oylik Maosh</label><input type="number" value="${emp.salary}" onchange="updateEmp(${idx},'salary',this.value)" /></div>
+            <div class="form-group"><label>Avans (${UZ_MONTHS[currentMonth]})</label><input type="number" value="${advVal}" onchange="updateAdvance(${emp.id},this.value)" placeholder="0" /></div>
+          </div>
+        </div>`;
       });
       document.getElementById("settingsEmpList").innerHTML = html;
+    }
+
+    function updateAdvance(empId, val) {
+      const key = monthKey();
+      if (!state.advances) state.advances = {};
+      if (!state.advances[key]) state.advances[key] = {};
+      state.advances[key][empId] = parseInt(val) || 0;
+      saveState();
+      toast("Avans saqlandi ✓");
+    }
+
+    function exportToExcel() {
+      const key = monthKey();
+      let csv = "\uFEFFXodim Ismi,Oylik Maosh,Kechikish/Jarima,Berilgan Avans,Qo'lga Tegadigan Maosh\n";
+      state.employees.forEach(emp => {
+        const st = getMonthStats(emp);
+        csv += `"${emp.name}",${st.salary},${st.penalty},${st.advance},${st.handPay}\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute("download", `Tabel_Hisobot_${UZ_MONTHS[currentMonth]}_${YEAR}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     let currentDay = 1;
     function openDayModal(day) {
       const jsDay = new Date(YEAR, currentMonth - 1, day).getDay();
-      if (jsDay === 0) {
-        toast("Yakshanba — dam olish kuni!");
-        return;
-      }
+      if (jsDay === 0) { toast("Yakshanba — dam olish kuni!"); return; }
       currentDay = day;
       const key = monthKey();
       const att = (state.attendance[key] || {})[day] || {};
