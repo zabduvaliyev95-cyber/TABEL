@@ -11,7 +11,6 @@
   <meta name="format-detection" content="telephone=no" />
   <title>Profitcontrol Tabel</title>
   
-  <!-- Ikonka (T harfi) -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2B4C'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='system-ui,Arial' font-weight='800'%3ET%3C/text%3E%3C/svg%3E" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2B4C'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='system-ui,Arial' font-weight='800'%3ET%3C/text%3E%3C/svg%3E" />
   <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Profitcontrol%20Tabel%22%2C%22short_name%22%3A%22Tabel%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231A2B4C%22%2C%22theme_color%22%3A%22%231A2B4C%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%253E%253Crect%20width%3D'100'%20height%3D'100'%20rx%3D'22'%20fill%3D'%25231A2B4C'%2F%253E%253Ctext%20x%3D'50'%20y%3D'68'%20font-size%3D'55'%20text-anchor%3D'middle'%20fill%3D'white'%20font-family%3D'system-ui'%20font-weight%3D'800'%253ET%253C%2Ftext%253E%253C%2Fsvg%3E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
@@ -400,12 +399,13 @@
 
     function formatMoney(n) { return new Intl.NumberFormat("uz-UZ").format(Math.round(n || 0)) + " so‘m"; }
     
-    // Faqat yakshanba (day === 0) dam olish kuni bo'lishi uchun to'g'irlandi
+    // To'g'rilangan ish kunlari hisobi (JavaScript'da getDay() bo'yicha 0 - Yakshanba)
     function workDaysInMonth(month) {
       const dim = daysInMonth(month);
       let count = 0;
       for (let d = 1; d <= dim; d++) {
-        if (new Date(YEAR, month - 1, d).getDay() !== 0) count++;
+        const jsDay = new Date(YEAR, month - 1, d).getDay();
+        if (jsDay !== 0) count++; // Faqat yakshanba (0) dam olish
       }
       return count;
     }
@@ -440,7 +440,8 @@
       const daily = dailyRate(emp, month);
       let totalPenalty = 0, daysPresent = 0;
       for (let d = 1; d <= dim; d++) {
-        if (new Date(YEAR, month - 1, d).getDay() === 0) continue; // Faqat yakshanba dam olish
+        const jsDay = new Date(YEAR, month - 1, d).getDay();
+        if (jsDay === 0) continue; // Yakshanbani hisobdan chiqaramiz
         const now = new Date();
         if (month === (now.getMonth() + 1) && d > now.getDate()) continue;
         const rec = (monthAtt[d] || {})[emp.id];
@@ -509,15 +510,16 @@
       const isAdmin = currentUser.role === "admin";
       let html = `<div style="margin-bottom:12px;font-weight:700;color:var(--primary)">${UZ_MONTHS[currentMonth]} ${YEAR}</div>`;
       for (let d = 1; d <= dim; d++) {
-        const wd = new Date(YEAR, currentMonth - 1, d).getDay();
-        const isSunday = (wd === 0);
+        const dateObj = new Date(YEAR, currentMonth - 1, d);
+        const jsDay = dateObj.getDay(); // 0 - Yakshanba, 1 - Dushanba ... 6 - Shanba
+        const isSunday = (jsDay === 0);
         const att = monthAtt[d] || {};
         const filled = isAdmin ? Object.keys(att).length : (att[currentUser.empId] ? 1 : 0);
         
         if (isSunday) {
-          html += `<div class="day-card weekend"><div class="day-header"><div><span class="day-date">${d}-${UZ_MONTHS[currentMonth].toLowerCase()}</span><span class="day-week"> • ${UZ_WEEKDAYS[wd]}</span></div><span class="badge badge-muted">Dam olish kuni</span></div></div>`;
+          html += `<div class="day-card weekend"><div class="day-header"><div><span class="day-date">${d}-${UZ_MONTHS[currentMonth].toLowerCase()}</span><span class="day-week"> • ${UZ_WEEKDAYS[jsDay]}</span></div><span class="badge badge-muted">Dam olish kuni</span></div></div>`;
         } else {
-          html += `<div class="day-card" onclick="openDayModal(${d})"><div class="day-header"><div><span class="day-date">${d}-${UZ_MONTHS[currentMonth].toLowerCase()}</span><span class="day-week"> • ${UZ_WEEKDAYS[wd]}</span></div><span class="badge ${filled ? 'badge-success' : 'badge-muted'}">${filled ? "to‘ldirilgan" : "bo‘sh"}</span></div></div>`;
+          html += `<div class="day-card" onclick="openDayModal(${d})"><div class="day-header"><div><span class="day-date">${d}-${UZ_MONTHS[currentMonth].toLowerCase()}</span><span class="day-week"> • ${UZ_WEEKDAYS[jsDay]}</span></div><span class="badge ${filled ? 'badge-success' : 'badge-muted'}">${filled ? "to‘ldirilgan" : "bo‘sh"}</span></div></div>`;
         }
       }
       document.getElementById("daysList").innerHTML = html;
@@ -549,8 +551,8 @@
 
     let currentDay = 1;
     function openDayModal(day) {
-      const wd = new Date(YEAR, currentMonth - 1, day).getDay();
-      if (wd === 0) {
+      const jsDay = new Date(YEAR, currentMonth - 1, day).getDay();
+      if (jsDay === 0) {
         toast("Yakshanba — dam olish kuni!");
         return;
       }
