@@ -1,863 +1,726 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabel va Davomat Tizimi (Onlayn)</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#1A2B4C" />
+  <meta name="apple-mobile-web-app-title" content="Tabel" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>Profitcontrol Tabel</title>
+  
+  <!-- Иконка приложения (Буква T на темно-синем фоне) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2B4C'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='system-ui,Arial' font-weight='800'%3ET%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2B4C'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='system-ui,Arial' font-weight='800'%3ET%3C/text%3E%3C/svg%3E" />
+  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Profitcontrol%20Tabel%22%2C%22short_name%22%3A%22Tabel%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231A2B4C%22%2C%22theme_color%22%3A%22%231A2B4C%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%253E%253Crect%20width%3D'100'%20height%3D'100'%20rx%3D'22'%20fill%3D'%25231A2B4C'%2F%253E%253Ctext%20x%3D'50'%20y%3D'68'%20font-size%3D'55'%20text-anchor%3D'middle'%20fill%3D'white'%20font-family%3D'system-ui'%20font-weight%3D'800'%253ET%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
 
-    <!-- PWA Manifest va Service Worker ulash -->
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#4f46e5">
-
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js')
-            .then(() => console.log('Service Worker tayyor!'))
-            .catch((err) => console.log('SW xatosi:', err));
-        });
-      }
-    </script>
+  <style>
+    :root {
+      --primary: #1A2B4C;
+      --primary-mid: #253A63;
+      --primary-light: #334E82;
+      --accent: #0EA5E9;
+      --accent-soft: #E0F2FE;
+      --success: #059669;
+      --success-bg: #ECFDF5;
+      --danger: #DC2626;
+      --danger-bg: #FEF2F2;
+      --warning: #D97706;
+      --warning-bg: #FFFBEB;
+      --bg: #F1F5F9;
+      --card: #FFFFFF;
+      --text: #0F172A;
+      --muted: #64748B;
+      --border: #E2E8F0;
+      --radius: 16px;
+      --shadow: 0 1px 3px rgba(15,23,42,0.04), 0 4px 16px rgba(15,23,42,0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(14,165,233,0.08), transparent),
+        linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
+      color: var(--text);
+      min-height: 100%;
+      min-height: 100dvh;
+      padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    }
+    .login-screen {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(ellipse 100% 80% at 50% -30%, rgba(14,165,233,0.18), transparent 60%),
+        linear-gradient(160deg, #1A2B4C 0%, #253A63 45%, #1A2B4C 100%);
+      padding: 24px;
+    }
+    .login-box {
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 36px 28px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+    }
+    .login-logo {
+      width: 72px; height: 72px;
+      background: linear-gradient(145deg, #1A2B4C, #334E82);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 28px; font-weight: 800; color: white;
+      box-shadow: 0 10px 28px rgba(26,43,76,0.35);
+    }
+    .login-title {
+      text-align: center;
+      font-size: 1.45rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+      color: var(--primary);
+    }
+    .login-sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-bottom: 28px;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    input, select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 1rem;
+      background: #F8FAFC;
+      color: var(--text);
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 22px; border: none; border-radius: 12px;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #1A2B4C, #334E82);
+      color: white; width: 100%;
+      box-shadow: 0 4px 14px rgba(26,43,76,0.3);
+    }
+    .btn-keldim {
+      background: linear-gradient(135deg, #047857, #059669);
+      color: white; width: 100%;
+      padding: 18px 22px; font-size: 1.12rem; font-weight: 700;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(5,150,105,0.35);
+    }
+    .error-msg { color: var(--danger); font-size: 0.85rem; text-align: center; margin-top: 12px; display: none; }
+    .header {
+      background: linear-gradient(135deg, #1A2B4C 0%, #253A63 100%);
+      color: white; padding: 16px 18px 14px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 4px 20px rgba(26,43,76,0.25);
+    }
+    .header-top { display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 1.22rem; font-weight: 800; }
+    .header .user-info { font-size: 0.78rem; opacity: 0.9; margin-top: 2px; }
+    .logout-btn {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white; padding: 8px 14px; border-radius: 10px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    }
+    .card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 18px; margin-bottom: 14px;
+      border: 1px solid rgba(226,232,240,0.9);
+    }
+    .card-title { font-size: 0.92rem; font-weight: 700; color: var(--primary); margin-bottom: 14px; }
+    .nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(16px);
+      display: flex; border-top: 1px solid var(--border); z-index: 100;
+    }
+    .nav-item {
+      flex: 1; text-align: center; padding: 10px 4px 8px;
+      font-size: 0.68rem; color: var(--muted); cursor: pointer; font-weight: 500;
+    }
+    .nav-item.active { color: var(--primary); font-weight: 700; }
+    .nav-item .icon { font-size: 1.35rem; display: block; margin-bottom: 2px; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .emp-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0; border-bottom: 1px solid #f1f5f9;
+    }
+    .emp-name { font-weight: 700; font-size: 0.95rem; }
+    .emp-salary { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
+    .badge-success { background: #D1FAE5; color: #065F46; }
+    .badge-warning { background: #FEF3C7; color: #92400E; }
+    .badge-danger { background: #FEE2E2; color: #991B1B; }
+    .badge-muted { background: #F1F5F9; color: #475569; }
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat-box {
+      background: #FFFFFF; border-radius: 14px; padding: 16px; text-align: center;
+      border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(15,23,42,0.03);
+    }
+    .stat-box .value { font-size: 1.22rem; font-weight: 800; color: var(--primary); }
+    .stat-box .label { font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+    .day-card {
+      background: white; border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
+      border-left: 4px solid var(--primary); box-shadow: var(--shadow); cursor: pointer;
+      border: 1px solid rgba(226,232,240,0.7); border-left-width: 4px;
+    }
+    .day-header { display: flex; justify-content: space-between; align-items: center; }
+    .day-date { font-weight: 700; font-size: 0.95rem; }
+    .day-week { font-size: 0.8rem; color: var(--muted); }
+    .toast {
+      position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+      background: #1E293B; color: white; padding: 12px 24px; border-radius: 30px;
+      font-size: 0.9rem; z-index: 999; opacity: 0; transition: 0.3s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.55);
+      backdrop-filter: blur(6px); z-index: 200; display: none;
+      align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: white; width: 100%; max-width: 500px;
+      border-radius: 24px 24px 0 0; padding: 22px 18px 36px; max-height: 92vh; overflow-y: auto;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .close-btn { background: #F1F5F9; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1.35rem; cursor: pointer; color: var(--muted); }
+    .rules-box {
+      background: linear-gradient(135deg, #FFFBEB, #FEF3C7); border-left: 4px solid var(--warning);
+      padding: 14px 16px; border-radius: 0 14px 14px 0; font-size: 0.84rem; line-height: 1.6; margin-bottom: 14px;
+    }
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .row { display: flex; gap: 10px; } .row > * { flex: 1; }
+    .hidden { display: none !important; }
+    .sync-status { font-size: 0.7rem; opacity: 0.85; margin-top: 3px; }
+    .sync-online { color: #86EFAC; }
+    .sync-offline { color: #FCA5A5; }
+    .time-display {
+      text-align: center; padding: 20px 16px; background: #ECFDF5;
+      border-radius: 14px; margin-bottom: 14px; border: 2px solid #A7F3D0;
+    }
+    .time-display .time-value { font-size: 2rem; font-weight: 800; color: #065F46; }
+    .time-display .time-label { font-size: 0.8rem; color: #047857; margin-top: 4px; font-weight: 600; }
+    .time-display.locked { background: #F0F9FF; border-color: #BAE6FD; }
+    .time-display.locked .time-value { color: #0369A1; }
+    .container { padding: 16px; max-width: 640px; margin: 0 auto; width: 100%; }
+    .money-green { color: var(--success); font-weight: 700; }
+    .money-red { color: var(--danger); font-weight: 700; }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex">
+<body>
+  <!-- LOGIN -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-box">
+      <div class="login-logo">T</div>
+      <div class="login-title">Profitcontrol Tabel</div>
+      <div class="login-sub">2026 • Buxgalteriya &amp; Nazorat</div>
+      <div class="form-group">
+        <label>Login</label>
+        <input type="text" id="loginUser" placeholder="Loginni kiriting" autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label>Parol</label>
+        <input type="password" id="loginPass" placeholder="Parolni kiriting" autocomplete="current-password" />
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()">Kirish</button>
+      <div class="error-msg" id="loginError">Login yoki parol noto‘g‘ri</div>
+    </div>
+  </div>
 
-    <!-- Auth / Login View -->
-    <div id="authView" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 p-4">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
-            <div class="text-center mb-8">
-                <div class="inline-flex p-4 bg-blue-600 text-white rounded-2xl text-3xl mb-3 shadow-lg shadow-blue-200">
-                    <i class="fa-solid fa-calendar-check"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-slate-900">Tabel va Davomat Tizimi</h1>
-                <p class="text-xs text-slate-500 mt-1">Onlayn Bulutli Tizim</p>
-            </div>
-
-            <form onsubmit="window.handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Login (Foydalanuvchi ismi)</label>
-                    <input type="text" id="loginUsername" required placeholder="Masalan: akmal yoki menejer" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium bg-slate-50 text-sm">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Parol</label>
-                    <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium bg-slate-50 text-sm">
-                </div>
-
-                <div id="loginError" class="hidden text-xs text-rose-500 font-semibold text-center">
-                    Login yoki parol noto'g'ri!
-                </div>
-
-                <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98]">
-                    Kirish 🚀
-                </button>
-            </form>
-
-            <div class="mt-6 pt-4 border-t border-slate-100 text-center text-xs text-slate-400">
-                <p class="font-medium">Test loginlari:</p>
-                <p>Menejer: <strong class="text-slate-600">menejer</strong> / Parol: <strong class="text-slate-600">12345</strong></p>
-                <p>Akmal: <strong class="text-slate-600">akmal</strong> / Parol: <strong class="text-slate-600">12345</strong></p>
-            </div>
+  <!-- APP -->
+  <div id="app" class="hidden">
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <h1>Profitcontrol Tabel</h1>
+          <div class="user-info" id="headerUser"></div>
+          <div class="sync-status" id="syncStatus">● Sinxronlash...</div>
         </div>
+        <button class="logout-btn" onclick="doLogout()">Chiqish</button>
+      </div>
     </div>
+    <div class="toast" id="toast"></div>
 
-    <!-- Main Sidebar Layout -->
-    <div id="appView" class="hidden w-full min-h-screen flex flex-col md:flex-row">
-        
-        <!-- Sidebar Navigation -->
-        <aside class="w-full md:w-64 bg-white border-r border-slate-200 p-6 flex flex-col justify-between shrink-0">
-            <div>
-                <!-- Brand Logo -->
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="p-2.5 bg-blue-600 text-white rounded-xl shadow-md">
-                        <i class="fa-solid fa-calendar-check text-xl"></i>
-                    </div>
-                    <span class="text-xl font-extrabold text-slate-900 tracking-tight">Tabel (Onlayn)</span>
-                </div>
-
-                <!-- Navigation Links -->
-                <nav class="space-y-2">
-                    <button id="navTabelBtn" onclick="window.switchTab('tabel')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-lg shadow-blue-200 transition-all">
-                        <i class="fa-solid fa-calendar-days text-base"></i>
-                        <span>Tabel</span>
-                    </button>
-
-                    <button id="navDavomatBtn" onclick="window.switchTab('davomat')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all">
-                        <i class="fa-solid fa-clipboard-user text-base"></i>
-                        <span>Davomat</span>
-                    </button>
-                    
-                    <button id="navEmployeesBtn" onclick="window.switchTab('employees')" class="w-full hidden flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all">
-                        <i class="fa-solid fa-users text-base"></i>
-                        <span>Xodimlar Boshqaruvi</span>
-                    </button>
-
-                    <button id="navSettingsBtn" onclick="window.switchTab('settings')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all">
-                        <i class="fa-solid fa-key text-base"></i>
-                        <span>Parol O'zgartirish</span>
-                    </button>
-                </nav>
-            </div>
-
-            <div class="pt-6 border-t border-slate-100">
-                <button onclick="window.handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-rose-600 hover:bg-rose-50 transition-all">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    <span>Chiqish</span>
-                </button>
-            </div>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="flex-1 p-6 md:p-8 overflow-y-auto">
-            
-            <!-- Top Navigation / User Header -->
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h2 class="text-xl font-extrabold text-slate-900" id="mainHeaderTitle">Tabel</h2>
-                    <p class="text-xs font-semibold text-slate-400" id="currentFullDateText">Bugun</p>
-                </div>
-                
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl shadow-sm border border-slate-200">
-                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs" id="userAvatarText">
-                            BM
-                        </div>
-                        <div class="text-left">
-                            <p class="text-xs font-bold text-slate-900" id="headerUserName">Bosh Menejer</p>
-                            <p class="text-[10px] font-semibold text-slate-400" id="headerUserRole">Menejer</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 1: TABEL VIEW -->
-            <div id="tabTabel" class="space-y-6">
-                
-                <!-- Blue Gradient Welcome Banner -->
-                <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-blue-500/10 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div class="space-y-2 z-10">
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">
-                                👋
-                            </div>
-                            <h1 id="welcomeTitle" class="text-2xl md:text-3xl font-extrabold">Salom!</h1>
-                        </div>
-                        <p id="welcomeSubtitle" class="text-xs md:text-sm text-blue-100 font-medium">Tizim paneli</p>
-                    </div>
-
-                    <div class="bg-white/10 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/20 text-right w-full md:w-auto z-10">
-                        <p class="text-[11px] font-bold uppercase tracking-wider text-blue-100 flex items-center justify-end gap-1.5">
-                            <i class="fa-solid fa-lock text-xs"></i> Tanlangan oy uchun summa
-                        </p>
-                        <p id="totalEarningsAmount" class="text-2xl md:text-3xl font-black mt-0.5 tracking-tight">0 so'm</p>
-                    </div>
-
-                    <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-                </div>
-
-                <!-- Xodim uchun Asosiy "Keldim" paneli -->
-                <div id="employeeActionContainer" class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 rounded-3xl shadow-xl space-y-5 border border-slate-800 hidden">
-                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
-                        <div>
-                            <span class="text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-800/50">
-                                Bugungi davomat
-                            </span>
-                            <h3 class="text-lg font-extrabold mt-2 text-white">Ishga kelganingizni tasdiqlang</h3>
-                        </div>
-                        <span id="attendanceStatusBadge" class="hidden text-xs font-bold px-3.5 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                            ✓ Bugun ro'yxatdan o'tgansiz
-                        </span>
-                    </div>
-
-                    <div id="checkInFormGroup" class="space-y-4">
-                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                            <button id="setNowTimeBtn" onclick="window.setCurrentTimeNow()" class="px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-black rounded-2xl text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all shrink-0">
-                                <i class="fa-solid fa-location-dot text-base"></i>
-                                <span>KELDIM</span>
-                            </button>
-
-                            <div class="flex-1">
-                                <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Kelgan vaqtingiz:</label>
-                                <input type="time" id="employeeTimeInput" value="09:00" class="w-full px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800/80 text-white font-extrabold text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition-all">
-                                <input type="checkbox" id="employeeUniformCheck" class="w-4 h-4 text-emerald-500 rounded border-slate-600 focus:ring-emerald-500 bg-slate-700">
-                                <span class="text-xs font-bold text-slate-200">Forma kiymadim (-1/3 jarima)</span>
-                            </label>
-
-                            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition-all">
-                                <input type="checkbox" id="employeePhoneCheck" class="w-4 h-4 text-emerald-500 rounded border-slate-600 focus:ring-emerald-500 bg-slate-700">
-                                <span class="text-xs font-bold text-slate-200">Telefondan foydalandim (-1/3 jarima)</span>
-                            </label>
-                        </div>
-
-                        <div class="pt-2">
-                            <button id="submitAttendanceBtn" onclick="window.submitEmployeeAttendance()" class="w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-blue-600/30 transition-all">
-                                Saqlash va Tasdiqlash ✅
-                            </button>
-                        </div>
-                    </div>
-
-                    <p id="attendanceNoticeText" class="text-[11px] font-medium text-slate-400">
-                        *Eslatma: Kelgan vaqtingizni bir kunda faqat 1 marotaba kiritish mumkin. Keyinroq qayta o'zgartirib bo'lmaydi.
-                    </p>
-                </div>
-
-                <!-- Controls & Stats Cards Grid -->
-                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                    <div class="flex items-center gap-3 w-full lg:w-auto">
-                        <div class="flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-sm">
-                            <button onclick="window.changeDate(-1)" class="text-slate-500 hover:text-blue-600 font-extrabold text-sm p-1">◀</button>
-                            <span id="selectedDateLabel" class="text-xs font-bold text-slate-700 px-2 min-w-[110px] text-center">Joriy Oy</span>
-                            <button onclick="window.changeDate(1)" class="text-slate-500 hover:text-blue-600 font-extrabold text-sm p-1">▶</button>
-                        </div>
-
-                        <!-- Menejer uchun Xodim Tanlash -->
-                        <select id="employeeSelectDropdown" onchange="window.onEmployeeSelectChange()" class="hidden bg-white border border-slate-200 text-slate-800 text-xs font-bold rounded-2xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
-                        </select>
-                    </div>
-
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto flex-1">
-                        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm shadow-md shadow-blue-200">
-                                <i class="fa-solid fa-calendar-check"></i>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
-                                    <i class="fa-solid fa-check"></i> Ishlagan
-                                </p>
-                                <p id="statWorkedDays" class="text-lg font-extrabold text-slate-800">0</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-sm shadow-md shadow-amber-200">
-                                <i class="fa-solid fa-clock-rotate-left"></i>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold text-rose-500 flex items-center gap-1">
-                                    <i class="fa-solid fa-clock"></i> Kechikish
-                                </p>
-                                <p id="statLateDays" class="text-lg font-extrabold text-slate-800">0</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center text-sm shadow-md shadow-rose-200">
-                                <i class="fa-solid fa-shirt"></i>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-500 flex items-center gap-1">
-                                    <i class="fa-solid fa-shirt"></i> Forma kiymagan
-                                </p>
-                                <p id="statUniformFines" class="text-lg font-extrabold text-slate-800">0</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center text-sm shadow-md shadow-sky-200">
-                                <i class="fa-solid fa-mobile-screen-button"></i>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-500 flex items-center gap-1">
-                                    <i class="fa-solid fa-mobile"></i> Telefon ishlatgan
-                                </p>
-                                <p id="statPhoneFines" class="text-lg font-extrabold text-slate-800">0</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-amber-50/80 border border-amber-200 px-6 py-3.5 rounded-2xl flex items-center gap-3 text-amber-900 shadow-sm">
-                    <i class="fa-solid fa-lock text-amber-600 text-sm"></i>
-                    <p class="text-xs font-bold">
-                        Hisoblangan ish haqi: <span id="amberWageDisplay" class="text-emerald-600 font-extrabold text-sm ml-1">0 so'm</span>
-                    </p>
-                </div>
-
-                <!-- Monthly Calendar Grid Section -->
-                <div class="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
-                    <div class="flex justify-between items-center flex-wrap gap-2">
-                        <h3 class="text-xs font-bold text-slate-500 flex items-center gap-2">
-                            <i class="fa-solid fa-calendar text-blue-600"></i> Oylik kalendar
-                        </h3>
-                        <p class="text-[11px] text-blue-600 font-bold bg-blue-50 px-3 py-1 rounded-full">
-                            💡 Vaqt kiritish uchun kiritilmagan kunga bosing (bir marta saqlangach o'zgartirib bo'lmaydi)
-                        </p>
-                    </div>
-
-                    <div class="max-w-xl mx-auto">
-                        <div class="grid grid-cols-7 gap-2 text-center text-[11px] font-bold text-rose-400 mb-2">
-                            <span>Yak</span>
-                            <span class="text-slate-400">Dus</span>
-                            <span class="text-slate-400">Ses</span>
-                            <span class="text-slate-400">Cho</span>
-                            <span class="text-slate-400">Pay</span>
-                            <span class="text-slate-400">Jum</span>
-                            <span class="text-slate-400">Sha</span>
-                        </div>
-
-                        <div id="calendarGrid" class="grid grid-cols-7 gap-2">
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- TAB 2: DAVOMAT VIEW -->
-            <div id="tabDavomat" class="space-y-6 hidden">
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <h3 class="text-base font-extrabold text-slate-900">Batafsil Davomat Jadvali</h3>
-                            <p class="text-xs text-slate-400" id="davomatSubtitleText">Kunlik kelish vaqtlari va jarimalar hisobi</p>
-                        </div>
-
-                        <div id="managerDavomatSelectContainer" class="hidden flex items-center gap-2">
-                            <label class="text-xs font-bold text-slate-500">Xodimni tanlang:</label>
-                            <select id="davomatEmployeeSelectDropdown" onchange="window.onDavomatEmployeeSelectChange()" class="bg-slate-50 border border-slate-200 text-slate-800 text-xs font-bold rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-400 uppercase tracking-wider font-bold">
-                                    <th class="p-3 rounded-l-xl">Sana</th>
-                                    <th class="p-3">Kelish Vaqti</th>
-                                    <th class="p-3">Forma Statusi</th>
-                                    <th class="p-3">Telefon Statusi</th>
-                                    <th class="p-3">Holati / Jarima</th>
-                                    <th class="p-3 text-right rounded-r-xl">Hisoblangan Maosh</th>
-                                </tr>
-                            </thead>
-                            <tbody id="detailedDavomatTableBody" class="divide-y divide-slate-100 font-semibold text-slate-700">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 3: EMPLOYEES MANAGEMENT -->
-            <div id="tabEmployees" class="space-y-6 hidden">
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-base font-extrabold text-slate-900">Xodimlar Ro'yxati</h3>
-                            <p class="text-xs text-slate-400">Bosh Menejer yangi xodimlarni qo'shishi, oylik va kelish vaqtini belgilashi mumkin</p>
-                        </div>
-                        <button onclick="window.openAddModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-200">
-                            + Yangi xodim qo'shish
-                        </button>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-400 uppercase tracking-wider font-bold">
-                                    <th class="p-3 rounded-l-xl">Ism / Login</th>
-                                    <th class="p-3">Parol</th>
-                                    <th class="p-3">Kunlik Maosh (so'm)</th>
-                                    <th class="p-3">Belgilangan Kelish Vaqti</th>
-                                    <th class="p-3">Talaba Rejimi</th>
-                                    <th class="p-3 text-right rounded-r-xl">Amallar</th>
-                                </tr>
-                            </thead>
-                            <tbody id="managerEmployeesTable" class="divide-y divide-slate-100 font-semibold text-slate-700">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 4: PASSWORD SETTINGS VIEW -->
-            <div id="tabSettings" class="space-y-6 hidden">
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm max-w-md space-y-4">
-                    <h3 class="text-base font-extrabold text-slate-900">Parolni O'zgartirish</h3>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1">Yangi Parol</label>
-                        <input type="password" id="newPasswordInput" placeholder="Yangi parolni kiriting" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <button onclick="window.changeUserPassword()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-200">
-                        Parolni Saqlash
-                    </button>
-                </div>
-            </div>
-
-        </main>
-    </div>
-
-    <!-- Modal: Kunlik vaqt va jarimalarni kiritish / tahrirlash -->
-    <div id="editDayModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-md space-y-4">
-            <h3 class="text-lg font-extrabold text-slate-900" id="editModalTitle">Sanani kiritish</h3>
-            
-            <p id="modalLockNotice" class="hidden text-xs font-bold text-amber-600 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
-                🔒 Ushbu sana bo'yicha ma'lumot allaqachon kiritilgan va uni qayta o'zgartirib bo'lmaydi.
-            </p>
-
-            <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1">Kelish vaqti:</label>
-                <input type="time" id="modalEditTime" value="09:00" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold bg-slate-50 text-sm outline-none">
-            </div>
-
-            <div class="flex items-center gap-2 pt-2">
-                <input type="checkbox" id="modalEditUniform" class="w-4 h-4 text-blue-600 rounded border-slate-300">
-                <label for="modalEditUniform" class="text-xs font-semibold text-slate-700 cursor-pointer">Forma kiymagan (-1/3 jarima)</label>
-            </div>
-
-            <div class="flex items-center gap-2 pt-1">
-                <input type="checkbox" id="modalEditPhone" class="w-4 h-4 text-blue-600 rounded border-slate-300">
-                <label for="modalEditPhone" class="text-xs font-semibold text-slate-700 cursor-pointer">Telefon ishlatgan (-1/3 jarima)</label>
-            </div>
-
-            <div class="flex justify-between gap-2 pt-4">
-                <button id="modalDeleteBtn" onclick="window.clearDayRecord()" class="px-3 py-2 bg-rose-50 text-rose-600 font-bold rounded-xl text-xs hover:bg-rose-100">O'chirish</button>
-                <div class="flex gap-2">
-                    <button onclick="window.closeEditModal()" class="px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs">Bekor qilish</button>
-                    <button id="modalSaveBtn" onclick="window.saveEditedDay()" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-md">Saqlash</button>
-                </div>
-            </div>
+    <div class="page active" id="page-home">
+      <div class="container">
+        <div class="card" style="padding:14px;margin-bottom:12px">
+          <div class="form-group" style="margin-bottom:0">
+            <label>Oy tanlash</label>
+            <select id="monthSelect" onchange="changeMonth(this.value)" style="font-size:1.05rem;font-weight:700"></select>
+          </div>
         </div>
-    </div>
-
-    <!-- Modal: Yangi Xodim Qo'shish -->
-    <div id="addEmployeeModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-md space-y-4">
-            <h3 class="text-lg font-extrabold text-slate-900">Yangi Xodim Qo'shish</h3>
-            
-            <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1">Ism va Login</label>
-                <input type="text" id="modalEmpName" placeholder="Masalan: Sardor" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 outline-none">
-            </div>
-
-            <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1">Parol</label>
-                <input type="password" id="modalEmpPass" value="12345" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 outline-none">
-            </div>
-
-            <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1">Kunlik Maosh (so'm)</label>
-                <input type="number" id="modalEmpWage" value="444231" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 outline-none">
-            </div>
-
-            <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1">Menejer belgilagan kelish vaqti</label>
-                <input type="time" id="modalCustomTime" value="09:00" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 outline-none">
-            </div>
-
-            <div class="flex items-center gap-2 pt-1">
-                <input type="checkbox" id="modalIsStudent" class="w-4 h-4 text-blue-600 rounded border-slate-300">
-                <label for="modalIsStudent" class="text-xs font-bold text-slate-700">Talaba (O'qishdan keyin 14:00+ kelishi mumkin)</label>
-            </div>
-
-            <div class="flex justify-end gap-2 pt-4">
-                <button onclick="window.closeAddModal()" class="px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs">Bekor qilish</button>
-                <button onclick="window.saveNewEmployee()" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-md">Saqlash</button>
-            </div>
+        <div class="rules-box">
+          <b>Kechikish qoidalari:</b><br>
+          06:00 – 09:20 → <b>100%</b> (jarimasiz)<br>
+          09:20 – 11:00 → <b>2/3</b> (1/3 jarima)<br>
+          <b>11:00 va undan keyin → 0</b> (to‘liq kunlik maosh jarima)<br><br>
+          <b>Qo‘shimcha jarimalar:</b><br>
+          Forma kiymagan → <b>−1/3</b> kunlik maosh<br>
+          Telefon ishlatgan → <b>−1/3</b> kunlik maosh
         </div>
+        <div class="summary-grid" id="summaryGrid"></div>
+        <div class="card" style="margin-top:14px" id="homeEmpCard">
+          <div class="card-title">👥 Xodimlar</div>
+          <div id="empList"></div>
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top:8px" onclick="openToday()">
+          ➕ Bugungi kunni to‘ldirish
+        </button>
+      </div>
     </div>
 
-    <!-- Firebase SDK & App Logic -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+    <div class="page" id="page-days">
+      <div class="container">
+        <div class="card">
+          <div class="card-title">📅 Kunlar ro‘yxati</div>
+          <div id="daysList"></div>
+        </div>
+      </div>
+    </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCOcWrX6D67op8Xmvosi17FGkr2pqS_Zgs",
-            authDomain: "tabel-28960.firebaseapp.com",
-            projectId: "tabel-28960",
-            storageBucket: "tabel-28960.appspot.com",
-            messagingSenderId: "551556121148",
-            appId: "1:551556121148:web:0f745b7375db3a62703939",
-            measurementId: "G-85NBEC4RCW"
-        };
+    <div class="page" id="page-report">
+      <div class="container">
+        <div class="card">
+          <div class="card-title">📊 Oylik hisobot</div>
+          <div id="reportList"></div>
+        </div>
+        <div class="card" id="reportTotalCard">
+          <div class="card-title">💰 Umumiy</div>
+          <div id="reportTotal"></div>
+        </div>
+      </div>
+    </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    <div class="page" id="page-settings">
+      <div class="container">
+        <div class="card" id="adminEmpCard">
+          <div class="card-title">👥 Xodimlar va loginlar (menejer)</div>
+          <div id="settingsEmpList"></div>
+          <button class="btn btn-outline btn-block" style="margin-top:12px" onclick="addEmployee()">+ Yangi xodim qo‘shish</button>
+        </div>
+        <div class="card">
+          <div class="card-title">🗑 Ma’lumotlarni tozalash</div>
+          <button class="btn btn-danger btn-block" onclick="clearAttendance()">Davomatni tozalash</button>
+        </div>
+      </div>
+    </div>
 
-        let dbState = { employees: [], attendance: {} };
-        let currentUser = null;
-        let selectedDate = new Date();
-        let managerSelectedEmpId = null;
-        let activeModalDateStr = null;
+    <div class="nav" id="bottomNav">
+      <div class="nav-item active" data-page="home" onclick="showPage('home')"><span class="icon">🏠</span>Bosh sahifa</div>
+      <div class="nav-item" data-page="days" onclick="showPage('days')"><span class="icon">📅</span>Kunlar</div>
+      <div class="nav-item" data-page="report" onclick="showPage('report')"><span class="icon">📊</span>Hisobot</div>
+      <div class="nav-item" data-page="settings" onclick="showPage('settings')" id="navSettings"><span class="icon">⚙️</span>Sozlama</div>
+    </div>
+  </div>
 
-        const docRef = doc(db, "tabel_data", "main_store");
+  <div class="modal-overlay" id="dayModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Kunni to‘ldirish</h2>
+        <button class="close-btn" onclick="closeDayModal()">×</button>
+      </div>
+      <div id="modalBody"></div>
+      <button class="btn btn-success btn-block" style="margin-top:16px;display:none" id="adminSaveBtn" onclick="saveDayAdmin()">💾 Saqlash</button>
+    </div>
+  </div>
 
-        // Real-time synchronization with Firestore
-        onSnapshot(docRef, (docSnap) => {
-            if (docSnap.exists()) {
-                dbState = docSnap.data();
-            } else {
-                // Initialize default if empty
-                dbState = {
-                    employees: [
-                        { id: '1', username: 'akmal', name: 'Akmal Tursunov', pass: '12345', wage: 444231, isStudent: false, customTime: '09:00' },
-                        { id: '2', username: 'menejer', name: 'Bosh Menejer', pass: '12345', wage: 0, isStudent: false, customTime: '09:00' }
-                    ],
-                    attendance: {}
-                };
-                setDoc(docRef, dbState);
-            }
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3ZrAR15KyV3_8cLbUr4V-d5sLtx2H29Q",
+      authDomain: "ishtabel-d4326.firebaseapp.com",
+      databaseURL: "https://ishtabel-d4326-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "ishtabel-d4326",
+      storageBucket: "ishtabel-d4326.firebasestorage.app",
+      messagingSenderId: "595716146339",
+      appId: "1:595716146339:web:ce135e1410383e4c5f2b16"
+    };
+
+    const YEAR = 2026;
+    const UZ_MONTHS = ["","Yanvar","Fevral","Mart","Aprel","May","Iyun","Iyul","Avgust","Sentabr","Oktabr","Noyabr","Dekabr"];
+    const UZ_WEEKDAYS = ["Yakshanba","Dushanba","Seshanba","Chorshanba","Payshanba","Juma","Shanba"];
+
+    let currentMonth = Math.min(12, Math.max(1, new Date().getMonth() + 1));
+
+    function daysInMonth(month) { return new Date(YEAR, month, 0).getDate(); }
+    function monthKey(month = currentMonth) { return YEAR + "-" + String(month).padStart(2, "0"); }
+
+    function fillMonthSelect() {
+      const sel = document.getElementById("monthSelect");
+      if (!sel) return;
+      let html = "";
+      for (let m = 1; m <= 12; m++) {
+        html += `<option value="${m}" ${m === currentMonth ? "selected" : ""}>${UZ_MONTHS[m]} ${YEAR}</option>`;
+      }
+      sel.innerHTML = html;
+    }
+
+    function changeMonth(m) {
+      currentMonth = parseInt(m) || 10;
+      fillMonthSelect();
+      if (document.getElementById("page-home").classList.contains("active")) renderHome();
+      if (document.getElementById("page-days").classList.contains("active")) renderDays();
+      if (document.getElementById("page-report").classList.contains("active")) renderReport();
+    }
+
+    function openToday() {
+      const now = new Date();
+      currentMonth = now.getMonth() + 1;
+      fillMonthSelect();
+      openDayModal(now.getDate());
+    }
+
+    function isToday(day, month = currentMonth) {
+      const now = new Date();
+      return (now.getMonth() + 1) === month && now.getDate() === day;
+    }
+
+    const DEFAULT_USERS = {
+      menejer: { password: "123", role: "admin", name: "Menejer", empId: null }
+    };
+
+    const DEFAULT_EMPLOYEES = [
+      { id: 1, name: "AKMAL", salary: 10000000, login: "akmal", password: "123" },
+      { id: 2, name: "IBROHIM", salary: 10000000, login: "ibrohim", password: "123" }
+    ];
+
+    function createDefaultState() {
+      const users = { ...DEFAULT_USERS };
+      const employees = JSON.parse(JSON.stringify(DEFAULT_EMPLOYEES));
+      employees.forEach(e => {
+        users[e.login] = { password: e.password, role: "employee", name: e.name, empId: e.id };
+      });
+      return { employees, attendance: {}, workDays: 25, users, notifications: [] };
+    }
+
+    let state = createDefaultState();
+    let currentUser = null;
+    let db = null;
+    let isFirebaseReady = false;
+
+    function initFirebase() {
+      try {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+        isFirebaseReady = true;
+        setSyncStatus(true, "Onlayn ulangan");
+        return true;
+      } catch (e) {
+        setSyncStatus(false, "Oflayn rejim");
+        return false;
+      }
+    }
+
+    function setSyncStatus(online, text) {
+      const el = document.getElementById("syncStatus");
+      if (!el) return;
+      el.textContent = (online ? "● " : "○ ") + text;
+      el.className = "sync-status " + (online ? "sync-online" : "sync-offline");
+    }
+
+    function loadState() {
+      if (isFirebaseReady) {
+        db.ref("ish_tabeli").on("value", (snap) => {
+          const data = snap.val();
+          if (data) {
+            state = data;
+            if (!state.users) state.users = {};
+            if (!state.employees) state.employees = [];
+            if (!state.attendance) state.attendance = {};
+            setSyncStatus(true, "Onlayn • Sinxronlangan");
             if (currentUser) {
-                renderApp();
+              if (document.getElementById("page-home").classList.contains("active")) renderHome();
+              if (document.getElementById("page-days").classList.contains("active")) renderDays();
+              if (document.getElementById("page-report").classList.contains("active")) renderReport();
+              if (document.getElementById("page-settings").classList.contains("active")) renderSettings();
             }
+          }
         });
+      } else {
+        const saved = localStorage.getItem("ish_tabeli_v3");
+        if (saved) state = JSON.parse(saved);
+        else state = createDefaultState();
+      }
+    }
 
-        async function saveStateToFirebase() {
-            await setDoc(docRef, dbState);
+    function saveState() {
+      localStorage.setItem("ish_tabeli_v3", JSON.stringify(state));
+      if (isFirebaseReady && db) db.ref("ish_tabeli").set(state);
+    }
+
+    function doLogin() {
+      const login = document.getElementById("loginUser").value.trim().toLowerCase();
+      const pass = document.getElementById("loginPass").value.trim();
+      const err = document.getElementById("loginError");
+
+      if (!state.users || Object.keys(state.users).length === 0) {
+        state = createDefaultState();
+        saveState();
+      }
+
+      const user = state.users[login];
+      if (!user || user.password !== pass) {
+        err.style.display = "block";
+        return;
+      }
+      err.style.display = "none";
+      currentUser = { login, ...user };
+      document.getElementById("loginScreen").classList.add("hidden");
+      document.getElementById("app").classList.remove("hidden");
+      document.getElementById("headerUser").textContent = currentUser.role === "admin" ? "👑 " + currentUser.name : "👤 " + currentUser.name;
+
+      const isAdmin = currentUser.role === "admin";
+      document.getElementById("adminEmpCard").style.display = isAdmin ? "block" : "none";
+      document.getElementById("navSettings").style.display = isAdmin ? "block" : "none";
+      document.getElementById("homeEmpCard").style.display = isAdmin ? "block" : "none";
+      document.getElementById("reportTotalCard").style.display = isAdmin ? "block" : "none";
+
+      showPage("home");
+    }
+
+    function doLogout() {
+      currentUser = null;
+      document.getElementById("app").classList.add("hidden");
+      document.getElementById("loginScreen").classList.remove("hidden");
+      document.getElementById("loginUser").value = "";
+      document.getElementById("loginPass").value = "";
+    }
+
+    function formatMoney(n) { return new Intl.NumberFormat("uz-UZ").format(Math.round(n || 0)) + " so‘m"; }
+    function workDaysInMonth(month) {
+      const dim = daysInMonth(month);
+      let count = 0;
+      for (let d = 1; d <= dim; d++) {
+        if (new Date(YEAR, month - 1, d).getDay() !== 0) count++;
+      }
+      return count;
+    }
+    function dailyRate(emp, month) {
+      const wd = workDaysInMonth(month || currentMonth);
+      return wd > 0 ? (emp.salary || 0) / wd : 0;
+    }
+    function calcDayPenalty(timeStr, daily, isAbsent, forma, telefon) {
+      if (isAbsent || !timeStr) return Math.round(daily);
+      const parts = timeStr.split(":").map(Number);
+      const minutes = (parts[0] || 0) * 60 + (parts[1] || 0);
+      let penalty = 0;
+      if (minutes >= 11 * 60 || minutes < 6 * 60) penalty = daily;
+      else if (minutes <= 9 * 60 + 20) penalty = 0;
+      else penalty = daily / 3;
+      if (!forma) penalty += daily / 3;
+      if (telefon) penalty += daily / 3;
+      return Math.min(Math.round(daily), Math.round(penalty));
+    }
+    function calcPay(timeStr, daily, isAbsent, forma, telefon) {
+      return Math.max(0, Math.round(daily - calcDayPenalty(timeStr, daily, isAbsent, forma, telefon)));
+    }
+    function getMonthStats(emp, month = currentMonth) {
+      const dim = daysInMonth(month);
+      const key = monthKey(month);
+      const monthAtt = state.attendance[key] || {};
+      const salary = emp.salary || 0;
+      const daily = dailyRate(emp, month);
+      let totalPenalty = 0, daysPresent = 0;
+      for (let d = 1; d <= dim; d++) {
+        if (new Date(YEAR, month - 1, d).getDay() === 0) continue;
+        const now = new Date();
+        if (month === (now.getMonth() + 1) && d > now.getDate()) continue;
+        const rec = (monthAtt[d] || {})[emp.id];
+        if (!rec) continue;
+        if (rec.absent || !rec.time) totalPenalty += calcDayPenalty("", daily, true);
+        else {
+          totalPenalty += calcDayPenalty(rec.time, daily, false, rec.forma !== false, !!rec.telefon);
+          daysPresent++;
         }
-
-        window.handleLogin = function(event) {
-            event.preventDefault();
-            const u = document.getElementById('loginUsername').value.trim().toLowerCase();
-            const p = document.getElementById('loginPassword').value.trim();
-
-            const found = dbState.employees.find(emp => emp.username.toLowerCase() === u && emp.pass === p);
-            if (found || (u === 'menejer' && p === '12345')) {
-                currentUser = found || { id: 'm', username: 'menejer', name: 'Bosh Menejer', role: 'manager' };
-                document.getElementById('authView').classList.add('hidden');
-                document.getElementById('appView').classList.remove('hidden');
-                
-                if (currentUser.username === 'menejer') {
-                    managerSelectedEmpId = dbState.employees.filter(e => e.username !== 'menejer')[0]?.id || '1';
-                    document.getElementById('navEmployeesBtn').classList.remove('hidden');
-                    document.getElementById('employeeSelectDropdown').classList.remove('hidden');
-                    document.getElementById('managerDavomatSelectContainer').classList.remove('hidden');
-                } else {
-                    managerSelectedEmpId = currentUser.id;
-                    document.getElementById('navEmployeesBtn').classList.add('hidden');
-                    document.getElementById('employeeSelectDropdown').classList.add('hidden');
-                    document.getElementById('managerDavomatSelectContainer').classList.add('hidden');
-                }
-                renderApp();
-            } else {
-                document.getElementById('loginError').classList.remove('hidden');
-            }
-        };
-
-        window.handleLogout = function() {
-            currentUser = null;
-            document.getElementById('appView').classList.add('hidden');
-            document.getElementById('authView').classList.remove('hidden');
-            document.getElementById('loginUsername').value = '';
-            document.getElementById('loginPassword').value = '';
-            document.getElementById('loginError').classList.add('hidden');
-        };
-
-        window.switchTab = function(tabName) {
-            ['tabel', 'davomat', 'employees', 'settings'].forEach(t => {
-                document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('hidden');
-                const btn = document.getElementById('nav' + t.charAt(0).toUpperCase() + t.slice(1) + 'Btn');
-                if (btn) {
-                    btn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all";
-                }
-            });
-
-            document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.remove('hidden');
-            const activeBtn = document.getElementById('nav' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Btn');
-            if (activeBtn) {
-                activeBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-lg shadow-blue-200 transition-all";
-            }
-            renderApp();
-        };
-
-        window.changeDate = function(dir) {
-            selectedDate.setMonth(selectedDate.getMonth() + dir);
-            renderApp();
-        };
-
-        window.setCurrentTimeNow = function() {
-            const now = new Date();
-            const hh = String(now.getHours()).padStart(2, '0');
-            const mm = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('employeeTimeInput').value = `${hh}:${mm}`;
-        };
-
-        window.submitEmployeeAttendance = function() {
-            if (!currentUser || currentUser.username === 'menejer') return;
-            const todayStr = new Date().toISOString().split('T')[0];
-            const key = `${currentUser.id}_${todayStr}`;
-
-            const time = document.getElementById('employeeTimeInput').value;
-            const noUniform = document.getElementById('employeeUniformCheck').checked;
-            const phone = document.getElementById('employeePhoneCheck').checked;
-
-            dbState.attendance[key] = { time, noUniform, phone };
-            saveStateToFirebase();
-            renderApp();
-        };
-
-        window.onEmployeeSelectChange = function() {
-            managerSelectedEmpId = document.getElementById('employeeSelectDropdown').value;
-            renderApp();
-        };
-
-        window.onDavomatEmployeeSelectChange = function() {
-            renderApp();
-        };
-
-        window.openAddModal = function() {
-            document.getElementById('addEmployeeModal').classList.remove('hidden');
-            document.getElementById('addEmployeeModal').classList.add('flex');
-        };
-
-        window.closeAddModal = function() {
-            document.getElementById('addEmployeeModal').classList.add('hidden');
-            document.getElementById('addEmployeeModal').classList.remove('flex');
-        };
-
-        window.saveNewEmployee = function() {
-            const name = document.getElementById('modalEmpName').value.trim();
-            const pass = document.getElementById('modalEmpPass').value.trim();
-            const wage = Number(document.getElementById('modalEmpWage').value) || 0;
-            const customTime = document.getElementById('modalCustomTime').value;
-            const isStudent = document.getElementById('modalIsStudent').checked;
-
-            if (!name) return;
-            const newId = String(Date.now());
-            const username = name.toLowerCase().replace(/\s+/g, '');
-
-            dbState.employees.push({ id: newId, username, name, pass, wage, isStudent, customTime });
-            saveStateToFirebase();
-            window.closeAddModal();
-            renderApp();
-        };
-
-        window.changeUserPassword = function() {
-            const newPass = document.getElementById('newPasswordInput').value.trim();
-            if (!newPass || !currentUser) return;
-            const emp = dbState.employees.find(e => e.id === currentUser.id);
-            if (emp) {
-                emp.pass = newPass;
-                saveStateToFirebase();
-                alert("Parol muvaffaqiyatli o'zgartirildi!");
-                document.getElementById('newPasswordInput').value = '';
-            }
-        };
-
-        function renderApp() {
-            if (!currentUser) return;
-
-            const isManager = currentUser.username === 'menejer';
-            document.getElementById('headerUserName').innerText = currentUser.name;
-            document.getElementById('headerUserRole').innerText = isManager ? 'Bosh Menejer' : 'Xodim';
-            document.getElementById('userAvatarText').innerText = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-
-            // Populate dropdowns
-            const empDropdown = document.getElementById('employeeSelectDropdown');
-            const davDropdown = document.getElementById('davomatEmployeeSelectDropdown');
-            const employeesList = dbState.employees.filter(e => e.username !== 'menejer');
-
-            empDropdown.innerHTML = employeesList.map(e => `<option value="${e.id}" ${e.id === managerSelectedEmpId ? 'selected' : ''}>${e.name}</option>`).join('');
-            davDropdown.innerHTML = employeesList.map(e => `<option value="${e.id}" ${e.id === managerSelectedEmpId ? 'selected' : ''}>${e.name}</option>`).join('');
-
-            const targetEmpId = isManager ? managerSelectedEmpId : currentUser.id;
-            const targetEmp = dbState.employees.find(e => e.id === targetEmpId) || employeesList[0];
-
-            // Welcome banner
-            document.getElementById('welcomeTitle').innerText = `Salom, ${currentUser.name}! 👋`;
-            document.getElementById('welcomeSubtitle').innerText = isManager ? `Boshqaruv paneli (${targetEmp?.name || ''})` : `Xodim shaxsiy kabineti`;
-
-            // Date formatting
-            const year = selectedDate.getFullYear();
-            const month = selectedDate.getMonth();
-            const monthNames = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
-            document.getElementById('selectedDateLabel').innerText = `${monthNames[month]} ${year}`;
-            document.getElementById('currentFullDateText').innerText = new Date().toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long', year: 'numeric' });
-
-            // Employee action container toggle
-            const actionContainer = document.getElementById('employeeActionContainer');
-            if (!isManager) {
-                actionContainer.classList.remove('hidden');
-                const todayStr = new Date().toISOString().split('T')[0];
-                const existingToday = dbState.attendance[`${currentUser.id}_${todayStr}`];
-                if (existingToday) {
-                    document.getElementById('attendanceStatusBadge').classList.remove('hidden');
-                    document.getElementById('employeeTimeInput').value = existingToday.time;
-                    document.getElementById('employeeUniformCheck').checked = existingToday.noUniform;
-                    document.getElementById('employeePhoneCheck').checked = existingToday.phone;
-                } else {
-                    document.getElementById('attendanceStatusBadge').classList.add('hidden');
-                }
-            } else {
-                actionContainer.classList.add('hidden');
-            }
-
-            // Calculate stats for selected month & target employee
-            let workedDays = 0;
-            let lateDays = 0;
-            let uniformFinesCount = 0;
-            let phoneFinesCount = 0;
-            let totalMonthEarnings = 0;
-
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const deadlineTime = targetEmp?.customTime || '09:00';
-            const dailyWage = targetEmp?.wage || 0;
-
-            let detailedHtml = '';
-            let calendarHtml = '';
-
-            for (let d = 1; d <= daysInMonth; d++) {
-                const dateObj = new Date(year, month, d);
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const dayOfWeek = dateObj.getDay();
-                const recordKey = `${targetEmpId}_${dateStr}`;
-                const record = dbState.attendance[recordKey];
-
-                let dayStatus = 'absent';
-                let dayWage = 0;
-
-                if (dayOfWeek === 0) {
-                    // Sunday off
-                    calendarHtml += `<div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center text-xs"><p class="font-bold text-slate-300">${d}</p><p class="text-[9px] text-slate-300">Dam</p></div>`;
-                    continue;
-                }
-
-                if (record) {
-                    workedDays++;
-                    let isLate = record.time > deadlineTime;
-                    if (isLate) lateDays++;
-
-                    let deductions = 0;
-                    if (record.noUniform) { uniformFinesCount++; deductions += 1/3; }
-                    if (record.phone) { phoneFinesCount++; deductions += 1/3; }
-
-                    let effectiveDays = Math.max(0, 1 - deductions);
-                    dayWage = Math.round(dailyWage * effectiveDays);
-                    totalMonthEarnings += dayWage;
-
-                    calendarHtml += `<div onclick="window.openEditModalForDate('${dateStr}')" class="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center text-xs cursor-pointer hover:bg-emerald-100 transition-all">
-                        <p class="font-black text-emerald-800">${d}</p>
-                        <p class="text-[10px] font-bold text-emerald-600">${record.time}</p>
-                    </div>`;
-
-                    detailedHtml += `<tr>
-                        <td class="p-3 font-bold">${dateStr}</td>
-                        <td class="p-3">${record.time} ${isLate ? '<span class="text-rose-500 text-[10px] font-bold">(Kechikdi)</span>' : ''}</td>
-                        <td class="p-3">${record.noUniform ? '<span class="text-rose-500 font-bold">Yo\'q (-1/3)</span>' : '<span class="text-emerald-600">Bor</span>'}</td>
-                        <td class="p-3">${record.phone ? '<span class="text-rose-500 font-bold">Ishlatgan (-1/3)</span>' : '<span class="text-emerald-600">Yo\'q</span>'}</td>
-                        <td class="p-3">${deductions > 0 ? `<span class="text-rose-500 font-bold">Jarima (-${Math.round(deductions*100)}%)</span>` : '<span class="text-emerald-600 font-bold">Ajoyib</span>'}</td>
-                        <th class="p-3 text-right text-slate-900">${dayWage.toLocaleString()} so'm</th>
-                    </tr>`;
-                } else {
-                    calendarHtml += `<div onclick="window.openEditModalForDate('${dateStr}')" class="p-2.5 rounded-2xl bg-white border border-slate-200 text-center text-xs cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all">
-                        <p class="font-bold text-slate-700">${d}</p>
-                        <p class="text-[9px] text-slate-400">Kiritilmagan</p>
-                    </div>`;
-
-                    detailedHtml += `<tr class="text-slate-400">
-                        <td class="p-3 font-bold">${dateStr}</td>
-                        <td class="p-3">-</td>
-                        <td class="p-3">-</td>
-                        <td class="p-3">-</td>
-                        <td class="p-3">Kiritilmagan</td>
-                        <td class="p-3 text-right">0 so'm</td>
-                    </tr>`;
-                }
-            }
-
-            document.getElementById('statWorkedDays').innerText = workedDays;
-            document.getElementById('statLateDays').innerText = lateDays;
-            document.getElementById('statUniformFines').innerText = uniformFinesCount;
-            document.getElementById('statPhoneFines').innerText = phoneFinesCount;
-            document.getElementById('totalEarningsAmount').innerText = `${totalMonthEarnings.toLocaleString()} so'm`;
-            document.getElementById('amberWageDisplay').innerText = `${totalMonthEarnings.toLocaleString()} so'm`;
-
-            document.getElementById('calendarGrid').innerHTML = calendarHtml;
-            document.getElementById('detailedDavomatTableBody').innerHTML = detailedHtml;
-
-            // Render Employees management table for Manager
-            if (isManager) {
-                let empTableHtml = '';
-                dbState.employees.filter(e => e.username !== 'menejer').forEach(emp => {
-                    empTableHtml += `<tr>
-                        <td class="p-3 font-bold text-slate-900">${emp.name} <span class="text-slate-400 text-[10px]">(${emp.username})</span></td>
-                        <td class="p-3">${emp.pass}</td>
-                        <td class="p-3">${emp.wage.toLocaleString()} so'm</td>
-                        <td class="p-3">${emp.customTime}</td>
-                        <td class="p-3">${emp.isStudent ? 'Ha (Talaba)' : "Yo'q"}</td>
-                        <td class="p-3 text-right">
-                            <button onclick="window.deleteEmployee('${emp.id}')" class="text-rose-500 hover:text-rose-700 font-bold">O'chirish</button>
-                        </td>
-                    </tr>`;
-                });
-                document.getElementById('managerEmployeesTable').innerHTML = empTableHtml;
-            }
+      }
+      return { paid: Math.max(0, salary - Math.round(totalPenalty)), penalty: Math.round(totalPenalty), salary, daily: Math.round(daily), daysPresent };
+    }
+    function formatTimeFull(timeStr) { return timeStr ? (timeStr.split(":").length === 2 ? timeStr + ":00" : timeStr) : "—"; }
+    function getNowTimeString() {
+      const now = new Date();
+      return String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0") + ":" + String(now.getSeconds()).padStart(2, "0");
+    }
+    function toast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.className = "toast show";
+      setTimeout(() => el.classList.remove("show"), 2800);
+    }
+    function showPage(name) {
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      document.getElementById("page-" + name).classList.add("active");
+      document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+      const nav = document.querySelector(`.nav-item[data-page="${name}"]`);
+      if (nav) nav.classList.add("active");
+      if (name === "home") renderHome();
+      if (name === "days") renderDays();
+      if (name === "report") renderReport();
+      if (name === "settings") renderSettings();
+    }
+    function renderHome() {
+      fillMonthSelect();
+      const emps = currentUser.role === "admin" ? state.employees : state.employees.filter(e => e.id === currentUser.empId);
+      let totalPaid = 0, totalPenalty = 0;
+      emps.forEach(emp => {
+        const st = getMonthStats(emp);
+        totalPaid += st.paid; totalPenalty += st.penalty;
+      });
+      document.getElementById("summaryGrid").innerHTML = `
+        <div class="stat-box"><div class="value">${daysInMonth(currentMonth)}</div><div class="label">Oy kunlari</div></div>
+        <div class="stat-box"><div class="value">${workDaysInMonth(currentMonth)}</div><div class="label">Ish kunlari</div></div>
+        <div class="stat-box"><div class="value money-green" style="font-size:1rem">${formatMoney(totalPaid)}</div><div class="label">Hisob</div></div>
+        <div class="stat-box"><div class="value money-red" style="font-size:1rem">${formatMoney(totalPenalty)}</div><div class="label">Jarima</div></div>
+      `;
+      if (currentUser.role === "admin") {
+        let html = "";
+        state.employees.forEach(emp => {
+          const st = getMonthStats(emp);
+          html += `<div class="emp-item"><div><div class="emp-name">${emp.name}</div><div class="emp-salary">Oylik: ${formatMoney(st.salary)}</div></div><div style="text-align:right"><div class="money-green">${formatMoney(st.paid)}</div><div class="money-red" style="font-size:0.78rem">−${formatMoney(st.penalty)}</div></div></div>`;
+        });
+        document.getElementById("empList").innerHTML = html || "<div class='empty-state'>Xodimlar yo‘q</div>";
+      }
+    }
+    function renderDays() {
+      fillMonthSelect();
+      const dim = daysInMonth(currentMonth);
+      const key = monthKey();
+      const monthAtt = state.attendance[key] || {};
+      const isAdmin = currentUser.role === "admin";
+      let html = `<div style="margin-bottom:12px;font-weight:700;color:var(--primary)">${UZ_MONTHS[currentMonth]} ${YEAR}</div>`;
+      for (let d = 1; d <= dim; d++) {
+        const wd = new Date(YEAR, currentMonth - 1, d).getDay();
+        const att = monthAtt[d] || {};
+        const filled = isAdmin ? Object.keys(att).length : (att[currentUser.empId] ? 1 : 0);
+        const today = isToday(d);
+        html += `<div class="day-card" onclick="openDayModal(${d})"><div class="day-header"><div><span class="day-date">${d}-${UZ_MONTHS[currentMonth].toLowerCase()}</span><span class="day-week"> • ${UZ_WEEKDAYS[wd]}</span></div><span class="badge ${filled ? 'badge-success' : 'badge-muted'}">${filled ? "to‘ldirilgan" : "bo‘sh"}</span></div></div>`;
+      }
+      document.getElementById("daysList").innerHTML = html;
+    }
+    function renderReport() {
+      fillMonthSelect();
+      const emps = currentUser.role === "admin" ? state.employees : state.employees.filter(e => e.id === currentUser.empId);
+      let html = "", grandPaid = 0, grandPenalty = 0, grandSalary = 0;
+      emps.forEach(emp => {
+        const st = getMonthStats(emp);
+        grandPaid += st.paid; grandPenalty += st.penalty; grandSalary += st.salary;
+        html += `<div class="emp-item"><div><div class="emp-name">${emp.name}</div><div class="emp-salary">${formatMoney(st.salary)}</div></div><div style="text-align:right"><div class="money-green">${formatMoney(st.paid)}</div><div class="money-red">−${formatMoney(st.penalty)}</div></div></div>`;
+      });
+      document.getElementById("reportList").innerHTML = html;
+      if (currentUser.role === "admin") {
+        document.getElementById("reportTotal").innerHTML = `<div class="emp-item"><div class="emp-name">Jami to‘lov</div><div class="money-green">${formatMoney(grandPaid)}</div></div>`;
+      }
+    }
+    function renderSettings() {
+      if (currentUser.role !== "admin") return;
+      let html = "";
+      state.employees.forEach((emp, idx) => {
+        html += `<div style="margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid #E2E8F0"><div class="form-group"><label>Ism</label><input type="text" value="${emp.name}" onchange="updateEmp(${idx},'name',this.value)" /></div><div class="form-group"><label>Oylik</label><input type="number" value="${emp.salary}" onchange="updateEmp(${idx},'salary',this.value)" /></div></div>`;
+      });
+      document.getElementById("settingsEmpList").innerHTML = html;
+    }
+    let currentDay = 1;
+    function openDayModal(day) {
+      currentDay = day;
+      const key = monthKey();
+      const att = (state.attendance[key] || {})[day] || {};
+      const emps = currentUser.role === "admin" ? state.employees : state.employees.filter(e => e.id === currentUser.empId);
+      let html = "";
+      emps.forEach(emp => {
+        const rec = att[emp.id] || { time: "", forma: true, telefon: false };
+        if (currentUser.role === "admin") {
+          html += `<div class="card" style="padding:14px;"><div style="font-weight:700;margin-bottom:8px">${emp.name}</div><input type="text" id="time_${emp.id}" value="${rec.time || ''}" placeholder="HH:MM:SS" style="text-align:center" /></div>`;
+        } else {
+          if (rec.time) {
+            html += `<div class="card"><div style="font-weight:700">${emp.name}</div><div class="time-display locked"><div class="time-value">${formatTimeFull(rec.time)}</div><div class="time-label">Saqlangan vaqt</div></div></div>`;
+          } else {
+            html += `<div class="card"><div style="font-weight:700;margin-bottom:12px">${emp.name}</div><div class="row" style="margin-bottom:12px"><div class="form-group"><label>Forma</label><select id="forma_${emp.id}"><option value="true">Ha</option><option value="false">Yo‘q</option></select></div><div class="form-group"><label>Telefon</label><select id="telefon_${emp.id}"><option value="false">Yo‘q</option><option value="true">Ha</option></select></div></div><button class="btn btn-keldim" onclick="pressKeldim(${emp.id})">✅ Keldim</button></div>`;
+          }
         }
-
-        window.openEditModalForDate = function(dateStr) {
-            activeModalDateStr = dateStr;
-            const targetEmpId = currentUser.username === 'menejer' ? managerSelectedEmpId : currentUser.id;
-            const recordKey = `${targetEmpId}_${dateStr}`;
-            const record = dbState.attendance[recordKey];
-
-            document.getElementById('editModalTitle').innerText = `Sana: ${dateStr}`;
-            if (record) {
-                document.getElementById('modalEditTime').value = record.time;
-                document.getElementById('modalEditUniform').checked = record.noUniform;
-                document.getElementById('modalEditPhone').checked = record.phone;
-            } else {
-                document.getElementById('modalEditTime').value = '09:00';
-                document.getElementById('modalEditUniform').checked = false;
-                document.getElementById('modalEditPhone').checked = false;
-            }
-
-            document.getElementById('editDayModal').classList.remove('hidden');
-            document.getElementById('editDayModal').classList.add('flex');
-        };
-
-        window.closeEditModal = function() {
-            document.getElementById('editDayModal').classList.add('hidden');
-            document.getElementById('editDayModal').classList.remove('flex');
-            activeModalDateStr = null;
-        };
-
-        window.saveEditedDay = function() {
-            if (!activeModalDateStr) return;
-            const targetEmpId = currentUser.username === 'menejer' ? managerSelectedEmpId : currentUser.id;
-            const recordKey = `${targetEmpId}_${activeModalDateStr}`;
-
-            const time = document.getElementById('modalEditTime').value;
-            const noUniform = document.getElementById('modalEditUniform').checked;
-            const phone = document.getElementById('modalEditPhone').checked;
-
-            dbState.attendance[recordKey] = { time, noUniform, phone };
-            saveStateToFirebase();
-            window.closeEditModal();
-            renderApp();
-        };
-
-        window.clearDayRecord = function() {
-            if (!activeModalDateStr) return;
-            const targetEmpId = currentUser.username === 'menejer' ? managerSelectedEmpId : currentUser.id;
-            const recordKey = `${targetEmpId}_${activeModalDateStr}`;
-
-            delete dbState.attendance[recordKey];
-            saveStateToFirebase();
-            window.closeEditModal();
-            renderApp();
-        };
-
-        window.deleteEmployee = function(empId) {
-            if (confirm("Haqiqatan ham bu xodimni o'chirmoqchimisiz?")) {
-                dbState.employees = dbState.employees.filter(e => e.id !== empId);
-                saveStateToFirebase();
-                renderApp();
-            }
-        };
-    </script>
+      });
+      document.getElementById("modalBody").innerHTML = html;
+      document.getElementById("adminSaveBtn").style.display = currentUser.role === "admin" ? "block" : "none";
+      document.getElementById("dayModal").classList.add("show");
+    }
+    function closeDayModal() { document.getElementById("dayModal").classList.remove("show"); }
+    function pressKeldim(empId) {
+      const key = monthKey();
+      if (!state.attendance[key]) state.attendance[key] = {};
+      if (!state.attendance[key][currentDay]) state.attendance[key][currentDay] = {};
+      state.attendance[key][currentDay][empId] = {
+        time: getNowTimeString(),
+        forma: document.getElementById(`forma_${empId}`).value === "true",
+        telefon: document.getElementById(`telefon_${empId}`).value === "true",
+        absent: false
+      };
+      saveState();
+      toast("Saqlandi ✓");
+      closeDayModal();
+      renderHome();
+    }
+    function saveDayAdmin() {
+      const key = monthKey();
+      if (!state.attendance[key]) state.attendance[key] = {};
+      if (!state.attendance[key][currentDay]) state.attendance[key][currentDay] = {};
+      state.employees.forEach(emp => {
+        const t = document.getElementById(`time_${emp.id}`);
+        if (t && t.value.trim()) {
+          state.attendance[key][currentDay][emp.id] = { time: t.value.trim(), forma: true, telefon: false, absent: false };
+        }
+      });
+      saveState();
+      closeDayModal();
+      toast("Saqlandi ✓");
+      renderHome();
+    }
+    function updateEmp(idx, field, value) {
+      state.employees[idx][field] = field === "salary" ? parseInt(value) || 0 : value;
+      saveState();
+    }
+    function addEmployee() {
+      const id = Date.now();
+      const login = "ishchi" + id.toString().slice(-4);
+      state.employees.push({ id, name: "YANGI XODIM", salary: 5000000, login, password: "123" });
+      state.users[login] = { password: "123", role: "employee", name: "YANGI XODIM", empId: id };
+      saveState();
+      renderSettings();
+    }
+    function clearAttendance() {
+      if (confirm("Tozalansinmi?")) { state.attendance = {}; saveState(); renderHome(); }
+    }
+    initFirebase();
+    loadState();
+  </script>
 </body>
 </html>
