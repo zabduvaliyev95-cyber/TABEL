@@ -13,6 +13,20 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
+
+    <!-- PWA Manifest va Service Worker ulash -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log('Service Worker tayyor!'))
+            .catch((err) => console.log('SW xatosi:', err));
+        });
+      }
+    </script>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex">
 
@@ -474,700 +488,128 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Initial default test data (Akmal Sentyabr 2026 3 late days)
-        const initialAttendance = {};
-        for (let d = 1; d <= 30; d++) {
-            const dateStr = `2026-09-${String(d).padStart(2, '0')}`;
-            const dayOfWeek = new Date(dateStr).getDay();
-            if (dayOfWeek !== 0) {
-                if (d === 2) {
-                    initialAttendance[`1_${dateStr}`] = { time: '09:25', noUniform: false, phone: false };
-                } else if (d === 10) {
-                    initialAttendance[`1_${dateStr}`] = { time: '09:35', noUniform: false, phone: false };
-                } else if (d === 18) {
-                    initialAttendance[`1_${dateStr}`] = { time: '09:40', noUniform: false, phone: false };
-                } else {
-                    initialAttendance[`1_${dateStr}`] = { time: '08:55', noUniform: false, phone: false };
-                }
+        let dbState = { employees: [], attendance: {} };
+        let currentUser = null;
+        let selectedDate = new Date();
+        let managerSelectedEmpId = null;
+        let activeModalDateStr = null;
+
+        const docRef = doc(db, "tabel_data", "main_store");
+
+        // Real-time synchronization with Firestore
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                dbState = docSnap.data();
+            } else {
+                // Initialize default if empty
+                dbState = {
+                    employees: [
+                        { id: '1', username: 'akmal', name: 'Akmal Tursunov', pass: '12345', wage: 444231, isStudent: false, customTime: '09:00' },
+                        { id: '2', username: 'menejer', name: 'Bosh Menejer', pass: '12345', wage: 0, isStudent: false, customTime: '09:00' }
+                    ],
+                    attendance: {}
+                };
+                setDoc(docRef, dbState);
             }
-        }
-
-        const defaultDb = {
-            employees: [
-                { id: '1', username: 'akmal', name: 'Akmal Tursunov', pass: '12345', wage: 444231, isStudent: false, customTime: '09:00' },
-                { id: '2', username: 'sardor', name: 'Sardor Rahimov', pass: '12345', wage: 150000, isStudent: true, customTime: '14:30' }
-            ],
-            attendance: initialAttendance
-        };
-
-        let dbState = defaultDb;
-        let selectedDate = new Date(); 
-        let managerSelectedEmpId = '1';
-        let activeEditingDateStr = '';
-
-        const docRef = doc(db, "tabel_system", "main_data");
-
-        async function initCloudSync() {
-            try {
-                const snap = await getDoc(docRef);
-                if (!snap.exists()) {
-                    await setDoc(docRef, defaultDb);
-                }
-            } catch (err) {
-                console.error("Cloud init error:", err);
+            if (currentUser) {
+                renderApp();
             }
+        });
 
-            onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data && data.employees) {
-                        dbState.employees = data.employees;
-                        dbState.attendance = data.attendance || {};
-                        
-                        // Sync current user session info from employees list
-                        const savedUserStr = localStorage.getItem('tabel_current_user');
-                        if (savedUserStr) {
-                            const current = JSON.parse(savedUserStr);
-                            if (current.role === 'employee') {
-                                const foundEmp = dbState.employees.find(e => e.id === current.id);
-                                if (foundEmp) {
-                                    current.name = foundEmp.name;
-                                    current.username = foundEmp.username;
-                                    localStorage.setItem('tabel_current_user', JSON.stringify(current));
-                                    dbState.currentUser = current;
-                                }
-                            }
-                        }
-
-                        renderDashboard();
-                        renderDavomatTable();
-                        if (dbState.currentUser && dbState.currentUser.role === 'manager') {
-                            renderEmployeesTable();
-                        }
-                        if (dbState.currentUser && dbState.currentUser.role === 'employee') {
-                            checkTodayAttendanceStatus();
-                        }
-                    }
-                }
-            });
+        async function saveStateToFirebase() {
+            await setDoc(docRef, dbState);
         }
 
-        async function saveCloudDb() {
-            try {
-                await setDoc(docRef, {
-                    employees: dbState.employees,
-                    attendance: dbState.attendance
-                });
-            } catch (err) {
-                console.error("Cloud save error:", err);
-                alert("Internetga ulanishda xatolik yuz berdi. Qaytadan urinib ko'ring!");
-            }
-        }
-
-        window.onload = function() {
-            updateDateHeader();
-            initCloudSync().then(() => {
-                const savedUser = localStorage.getItem('tabel_current_user');
-                if (savedUser) {
-                    dbState.currentUser = JSON.parse(savedUser);
-                    showApp();
-                } else {
-                    showAuth();
-                }
-            });
-        };
-
-        function updateDateHeader() {
-            const options = { weekday: 'long', day: 'numeric', month: 'long' };
-            document.getElementById('currentFullDateText').textContent = new Date().toLocaleDateString('uz-UZ', options);
-        }
-
-        window.handleLogin = function(e) {
-            e.preventDefault();
+        window.handleLogin = function(event) {
+            event.preventDefault();
             const u = document.getElementById('loginUsername').value.trim().toLowerCase();
             const p = document.getElementById('loginPassword').value.trim();
 
-            if (u === 'menejer' && p === '12345') {
-                dbState.currentUser = { role: 'manager', username: 'menejer', name: 'Bosh Menejer' };
-                localStorage.setItem('tabel_current_user', JSON.stringify(dbState.currentUser));
-                showApp();
-                return;
-            }
-
-            const emp = dbState.employees.find(e => e.username.toLowerCase() === u && e.pass === p);
-            if (emp) {
-                dbState.currentUser = { role: 'employee', id: emp.id, username: emp.username, name: emp.name };
-                localStorage.setItem('tabel_current_user', JSON.stringify(dbState.currentUser));
-                showApp();
+            const found = dbState.employees.find(emp => emp.username.toLowerCase() === u && emp.pass === p);
+            if (found || (u === 'menejer' && p === '12345')) {
+                currentUser = found || { id: 'm', username: 'menejer', name: 'Bosh Menejer', role: 'manager' };
+                document.getElementById('authView').classList.add('hidden');
+                document.getElementById('appView').classList.remove('hidden');
+                
+                if (currentUser.username === 'menejer') {
+                    managerSelectedEmpId = dbState.employees.filter(e => e.username !== 'menejer')[0]?.id || '1';
+                    document.getElementById('navEmployeesBtn').classList.remove('hidden');
+                    document.getElementById('employeeSelectDropdown').classList.remove('hidden');
+                    document.getElementById('managerDavomatSelectContainer').classList.remove('hidden');
+                } else {
+                    managerSelectedEmpId = currentUser.id;
+                    document.getElementById('navEmployeesBtn').classList.add('hidden');
+                    document.getElementById('employeeSelectDropdown').classList.add('hidden');
+                    document.getElementById('managerDavomatSelectContainer').classList.add('hidden');
+                }
+                renderApp();
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
             }
         };
 
         window.handleLogout = function() {
-            dbState.currentUser = null;
-            localStorage.removeItem('tabel_current_user');
-            showAuth();
-        };
-
-        function showAuth() {
-            document.getElementById('authView').classList.remove('hidden');
+            currentUser = null;
             document.getElementById('appView').classList.add('hidden');
-        }
-
-        function getTodayStr() {
-            const now = new Date();
-            const y = now.getFullYear();
-            const m = String(now.getMonth() + 1).padStart(2, '0');
-            const d = String(now.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        }
-
-        window.setCurrentTimeNow = function() {
-            const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('employeeTimeInput').value = `${h}:${m}`;
-        };
-
-        function checkTodayAttendanceStatus() {
-            if (!dbState.currentUser || dbState.currentUser.role === 'manager') return;
-
-            const todayStr = getTodayStr();
-            const key = `${dbState.currentUser.id}_${todayStr}`;
-            const rec = dbState.attendance[key];
-
-            const timeInput = document.getElementById('employeeTimeInput');
-            const uniformCheck = document.getElementById('employeeUniformCheck');
-            const phoneCheck = document.getElementById('employeePhoneCheck');
-            const submitBtn = document.getElementById('submitAttendanceBtn');
-            const setNowBtn = document.getElementById('setNowTimeBtn');
-            const badge = document.getElementById('attendanceStatusBadge');
-            const noticeText = document.getElementById('attendanceNoticeText');
-
-            if (rec && rec.time) {
-                timeInput.value = rec.time;
-                timeInput.disabled = true;
-                uniformCheck.checked = !!rec.noUniform;
-                uniformCheck.disabled = true;
-                phoneCheck.checked = !!rec.phone;
-                phoneCheck.disabled = true;
-
-                submitBtn.disabled = true;
-                submitBtn.className = "w-full sm:w-auto px-8 py-3 bg-slate-700 text-slate-400 font-bold rounded-xl text-xs cursor-not-allowed";
-                submitBtn.textContent = "Bugun uchun saqlangan 🔒";
-
-                if (setNowBtn) {
-                    setNowBtn.disabled = true;
-                    setNowBtn.className = "px-6 py-3.5 bg-slate-800 text-slate-500 font-bold rounded-2xl text-sm cursor-not-allowed shrink-0";
-                }
-
-                if (badge) badge.classList.remove('hidden');
-                if (noticeText) {
-                    noticeText.textContent = "*Siz bugungi kelgan vaqtingizni belgilab bo'lgansiz. Bir kunda faqat 1 marotaba kiritish mumkin.";
-                    noticeText.className = "text-[11px] font-bold text-amber-400";
-                }
-            } else {
-                timeInput.disabled = false;
-                uniformCheck.disabled = false;
-                phoneCheck.disabled = false;
-
-                submitBtn.disabled = false;
-                submitBtn.className = "w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-blue-600/30 transition-all";
-                submitBtn.textContent = "Saqlash va Tasdiqlash ✅";
-
-                if (setNowBtn) {
-                    setNowBtn.disabled = false;
-                    setNowBtn.className = "px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-black rounded-2xl text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all shrink-0";
-                }
-
-                if (badge) badge.classList.add('hidden');
-                if (noticeText) {
-                    noticeText.textContent = "*Eslatma: Kelgan vaqtingizni bir kunda faqat 1 marotaba kiritish mumkin. Keyinroq qayta o'zgartirib bo'lmaydi.";
-                    noticeText.className = "text-[11px] font-medium text-slate-400";
-                }
-            }
-        }
-
-        function showApp() {
-            document.getElementById('authView').classList.add('hidden');
-            document.getElementById('appView').classList.remove('hidden');
-
-            const isManager = dbState.currentUser.role === 'manager';
-            document.getElementById('headerUserName').textContent = dbState.currentUser.name;
-            document.getElementById('headerUserRole').textContent = isManager ? 'Menejer' : 'Xodim';
-            document.getElementById('userAvatarText').textContent = isManager ? 'BM' : dbState.currentUser.name.substring(0, 2).toUpperCase();
-
-            document.getElementById('welcomeTitle').textContent = `Salom, ${dbState.currentUser.name}!`;
-            document.getElementById('welcomeSubtitle').textContent = isManager ? 'Menejer paneli' : 'Xodim paneli';
-
-            const empSelect = document.getElementById('employeeSelectDropdown');
-            const davomatSelectContainer = document.getElementById('managerDavomatSelectContainer');
-
-            if (isManager) {
-                empSelect.classList.remove('hidden');
-                davomatSelectContainer.classList.remove('hidden');
-                davomatSelectContainer.classList.add('flex');
-                document.getElementById('employeeActionContainer').classList.add('hidden');
-                
-                const navEmpBtn = document.getElementById('navEmployeesBtn');
-                navEmpBtn.classList.remove('hidden');
-                navEmpBtn.classList.add('flex');
-
-                populateEmployeeDropdowns();
-            } else {
-                empSelect.classList.add('hidden');
-                davomatSelectContainer.classList.add('hidden');
-                davomatSelectContainer.classList.remove('flex');
-                document.getElementById('employeeActionContainer').classList.remove('hidden');
-
-                const navEmpBtn = document.getElementById('navEmployeesBtn');
-                navEmpBtn.classList.add('hidden');
-                navEmpBtn.classList.remove('flex');
-
-                managerSelectedEmpId = dbState.currentUser.id;
-                window.setCurrentTimeNow();
-                checkTodayAttendanceStatus();
-            }
-
-            window.switchTab('tabel');
-        }
-
-        function populateEmployeeDropdowns() {
-            const select1 = document.getElementById('employeeSelectDropdown');
-            const select2 = document.getElementById('davomatEmployeeSelectDropdown');
-            select1.innerHTML = '';
-            select2.innerHTML = '';
-
-            dbState.employees.forEach(emp => {
-                const opt1 = document.createElement('option');
-                opt1.value = emp.id;
-                opt1.textContent = emp.name;
-                select1.appendChild(opt1);
-
-                const opt2 = document.createElement('option');
-                opt2.value = emp.id;
-                opt2.textContent = emp.name;
-                select2.appendChild(opt2);
-            });
-
-            if (dbState.employees.length > 0) {
-                if (!dbState.employees.some(e => e.id === managerSelectedEmpId)) {
-                    managerSelectedEmpId = dbState.employees[0].id;
-                }
-                select1.value = managerSelectedEmpId;
-                select2.value = managerSelectedEmpId;
-            }
-        }
-
-        window.onEmployeeSelectChange = function() {
-            managerSelectedEmpId = document.getElementById('employeeSelectDropdown').value;
-            const s2 = document.getElementById('davomatEmployeeSelectDropdown');
-            if (s2) s2.value = managerSelectedEmpId;
-            renderDashboard();
-            renderDavomatTable();
-        };
-
-        window.onDavomatEmployeeSelectChange = function() {
-            managerSelectedEmpId = document.getElementById('davomatEmployeeSelectDropdown').value;
-            const s1 = document.getElementById('employeeSelectDropdown');
-            if (s1) s1.value = managerSelectedEmpId;
-            renderDashboard();
-            renderDavomatTable();
+            document.getElementById('authView').classList.remove('hidden');
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginError').classList.add('hidden');
         };
 
         window.switchTab = function(tabName) {
-            if (tabName === 'employees' && dbState.currentUser.role !== 'manager') {
-                alert('Sizda ushbu bo\'limga kirish vakolati yo\'q!');
-                return;
+            ['tabel', 'davomat', 'employees', 'settings'].forEach(t => {
+                document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('hidden');
+                const btn = document.getElementById('nav' + t.charAt(0).toUpperCase() + t.slice(1) + 'Btn');
+                if (btn) {
+                    btn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all";
+                }
+            });
+
+            document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.remove('hidden');
+            const activeBtn = document.getElementById('nav' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Btn');
+            if (activeBtn) {
+                activeBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-lg shadow-blue-200 transition-all";
             }
-
-            document.getElementById('tabTabel').classList.add('hidden');
-            document.getElementById('tabDavomat').classList.add('hidden');
-            document.getElementById('tabEmployees').classList.add('hidden');
-            document.getElementById('tabSettings').classList.add('hidden');
-
-            document.getElementById('navTabelBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all";
-            document.getElementById('navDavomatBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all";
-            document.getElementById('navEmployeesBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all";
-            document.getElementById('navSettingsBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all";
-
-            if (tabName === 'tabel') {
-                document.getElementById('tabTabel').classList.remove('hidden');
-                document.getElementById('navTabelBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-lg shadow-blue-200 transition-all";
-                document.getElementById('mainHeaderTitle').textContent = 'Tabel';
-                renderDashboard();
-            } else if (tabName === 'davomat') {
-                document.getElementById('tabDavomat').classList.remove('hidden');
-                document.getElementById('navDavomatBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-lg shadow-blue-200 transition-all";
-                document.getElementById('mainHeaderTitle').textContent = 'Davomat';
-                renderDavomatTable();
-            } else if (tabName === 'employees') {
-                document.getElementById('tabEmployees').classList.remove('hidden');
-                document.getElementById('navEmployeesBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-lg shadow-blue-200 transition-all";
-                document.getElementById('mainHeaderTitle').textContent = 'Xodimlar Boshqaruvi';
-                renderEmployeesTable();
-            } else if (tabName === 'settings') {
-                document.getElementById('tabSettings').classList.remove('hidden');
-                document.getElementById('navSettingsBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-lg shadow-blue-200 transition-all";
-                document.getElementById('mainHeaderTitle').textContent = 'Sozlamalar';
-            }
+            renderApp();
         };
 
-        function calculateDay(empId, dateStr) {
-            const emp = dbState.employees.find(e => e.id === empId);
-            if (!emp) return { earned: 0, status: 'Mavjud emas', late: false, uniformFine: false, phoneFine: false };
+        window.changeDate = function(dir) {
+            selectedDate.setMonth(selectedDate.getMonth() + dir);
+            renderApp();
+        };
 
-            const dObj = new Date(dateStr);
-            if (dObj.getDay() === 0) {
-                return { earned: 0, status: 'Yakshanba (Dam)', isOff: true, late: false };
-            }
+        window.setCurrentTimeNow = function() {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('employeeTimeInput').value = `${hh}:${mm}`;
+        };
 
-            const rec = dbState.attendance[`${empId}_${dateStr}`];
-            if (!rec || !rec.time) {
-                return { earned: 0, status: 'Ishga kelmadi', time: '-', late: false, uniformFine: false, phoneFine: false };
-            }
-
-            const [h, m] = rec.time.split(':').map(Number);
-            const totalMins = h * 60 + m;
-
-            if (!emp.isStudent && totalMins >= 840) {
-                return { earned: 0, status: 'Ishga kelmadi (>14:00)', time: rec.time, late: false, uniformFine: false, phoneFine: false };
-            }
-
-            let base = Number(emp.wage) || 0;
-            let deductionsCount = 0;
-            let isLate = false;
-
-            let assignedTimeStr = emp.customTime || '09:00';
-            const [stH, stM] = assignedTimeStr.split(':').map(Number);
-            let targetMins = (stH * 60 + stM) + 20;
-
-            if (totalMins > targetMins) {
-                deductionsCount++;
-                isLate = true;
-            }
-
-            if (rec.noUniform) deductionsCount++;
-            if (rec.phone) deductionsCount++;
-
-            const oneThird = base / 3;
-            const earned = Math.max(0, base - (oneThird * deductionsCount));
-
-            return {
-                earned: earned,
-                status: deductionsCount > 0 ? `Jarima (${deductionsCount}/3)` : 'Kelgan',
-                time: rec.time,
-                late: isLate,
-                uniformFine: !!rec.noUniform,
-                phoneFine: !!rec.phone
-            };
-        }
-
-        function renderDashboard() {
-            const empId = dbState.currentUser && dbState.currentUser.role === 'manager' ? managerSelectedEmpId : (dbState.currentUser ? dbState.currentUser.id : '1');
-            const emp = dbState.employees.find(e => e.id === empId);
-            if (!emp) return;
-
-            const year = selectedDate.getFullYear();
-            const month = selectedDate.getMonth();
-            const labelEl = document.getElementById('selectedDateLabel');
-            if (labelEl) {
-                labelEl.textContent = `${selectedDate.toLocaleString('uz-UZ', { month: 'long', year: 'numeric' })}`;
-            }
-
-            let workedDays = 0, lateDays = 0, uniformFines = 0, phoneFines = 0, totalEarned = 0;
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const res = calculateDay(empId, dateStr);
-
-                if (res.status !== 'Ishga kelmadi' && !res.isOff) {
-                    workedDays++;
-                    totalEarned += res.earned;
-                }
-                if (res.late) lateDays++;
-                if (res.uniformFine) uniformFines++;
-                if (res.phoneFine) phoneFines++;
-            }
-
-            document.getElementById('statWorkedDays').textContent = workedDays;
-            document.getElementById('statLateDays').textContent = lateDays;
-            document.getElementById('statUniformFines').textContent = uniformFines;
-            document.getElementById('statPhoneFines').textContent = phoneFines;
-
-            const formattedEarned = `${Math.round(totalEarned).toLocaleString()} so'm`;
-            document.getElementById('amberWageDisplay').textContent = formattedEarned;
-
-            if (dbState.currentUser && dbState.currentUser.role === 'manager') {
-                let grandTotal = 0;
-                dbState.employees.forEach(e => {
-                    for (let day = 1; day <= daysInMonth; day++) {
-                        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                        grandTotal += calculateDay(e.id, dateStr).earned;
-                    }
-                });
-                document.getElementById('totalEarningsAmount').textContent = `${Math.round(grandTotal).toLocaleString()} so'm`;
-            } else {
-                document.getElementById('totalEarningsAmount').textContent = formattedEarned;
-            }
-
-            renderCalendarGrid(empId, year, month, daysInMonth);
-        }
-
-        function renderCalendarGrid(empId, year, month, daysInMonth) {
-            const grid = document.getElementById('calendarGrid');
-            if (!grid) return;
-            grid.innerHTML = '';
-
-            const firstDayIndex = new Date(year, month, 1).getDay();
-
-            for (let i = 0; i < firstDayIndex; i++) {
-                const empty = document.createElement('div');
-                empty.className = "h-10";
-                grid.appendChild(empty);
-            }
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const res = calculateDay(empId, dateStr);
-
-                const cell = document.createElement('div');
-                cell.className = "h-10 rounded-xl flex flex-col items-center justify-center font-extrabold text-xs transition-all shadow-sm relative cursor-pointer hover:scale-105";
-
-                if (res.isOff) {
-                    cell.className += " bg-slate-100 text-slate-300";
-                } else if (res.status.includes('kelmadi')) {
-                    cell.className += " bg-rose-100 text-rose-500 border border-rose-200";
-                } else if (res.late || res.uniformFine || res.phoneFine) {
-                    cell.className += " bg-amber-100 text-amber-700 border border-amber-200";
-                } else {
-                    cell.className += " bg-emerald-100 text-emerald-700 border border-emerald-200";
-                }
-
-                cell.innerHTML = `<span>${day}</span>`;
-                if (res.time && res.time !== '-') {
-                    cell.innerHTML += `<span class="text-[9px] font-normal tracking-tighter opacity-80">${res.time}</span>`;
-                }
-
-                cell.setAttribute('onclick', `window.openEditDayModal('${dateStr}')`);
-                grid.appendChild(cell);
-            }
-        }
-
-        window.submitEmployeeAttendance = async function() {
-            const todayStr = getTodayStr();
-            const key = `${dbState.currentUser.id}_${todayStr}`;
-
-            if (dbState.attendance[key] && dbState.attendance[key].time) {
-                alert("Siz bugun uchun kelgan vaqtingizni allaqachon belgilagansiz!");
-                return;
-            }
+        window.submitEmployeeAttendance = function() {
+            if (!currentUser || currentUser.username === 'menejer') return;
+            const todayStr = new Date().toISOString().split('T')[0];
+            const key = `${currentUser.id}_${todayStr}`;
 
             const time = document.getElementById('employeeTimeInput').value;
             const noUniform = document.getElementById('employeeUniformCheck').checked;
             const phone = document.getElementById('employeePhoneCheck').checked;
 
             dbState.attendance[key] = { time, noUniform, phone };
-            await saveCloudDb();
-
-            checkTodayAttendanceStatus();
-            renderDashboard();
-            renderDavomatTable();
-            alert('Bugungi davomadingiz muvaffaqiyatli saqlandi! ✅');
+            saveStateToFirebase();
+            renderApp();
         };
 
-        window.openEditDayModal = function(dateStr) {
-            activeEditingDateStr = dateStr;
-            document.getElementById('editModalTitle').textContent = `${dateStr} sanasi uchun ma'lumot kiritish`;
-
-            const empId = dbState.currentUser.role === 'manager' ? managerSelectedEmpId : dbState.currentUser.id;
-            const key = `${empId}_${dateStr}`;
-            const rec = dbState.attendance[key];
-
-            const timeInput = document.getElementById('modalEditTime');
-            const uniformCheck = document.getElementById('modalEditUniform');
-            const phoneCheck = document.getElementById('modalEditPhone');
-            const saveBtn = document.getElementById('modalSaveBtn');
-            const deleteBtn = document.getElementById('modalDeleteBtn');
-            const notice = document.getElementById('modalLockNotice');
-
-            if (dbState.currentUser.role === 'employee' && rec && rec.time) {
-                timeInput.value = rec.time;
-                timeInput.disabled = true;
-                uniformCheck.checked = !!rec.noUniform;
-                uniformCheck.disabled = true;
-                phoneCheck.checked = !!rec.phone;
-                phoneCheck.disabled = true;
-
-                saveBtn.classList.add('hidden');
-                deleteBtn.classList.add('hidden');
-                notice.classList.remove('hidden');
-            } else {
-                timeInput.value = rec && rec.time && rec.time !== '-' ? rec.time : '09:00';
-                timeInput.disabled = false;
-                uniformCheck.checked = rec ? !!rec.noUniform : false;
-                uniformCheck.disabled = false;
-                phoneCheck.checked = rec ? !!rec.phone : false;
-                phoneCheck.disabled = false;
-
-                saveBtn.classList.remove('hidden');
-                if (dbState.currentUser.role === 'manager') {
-                    deleteBtn.classList.remove('hidden');
-                } else {
-                    deleteBtn.classList.add('hidden');
-                }
-                notice.classList.add('hidden');
-            }
-
-            document.getElementById('editDayModal').classList.remove('hidden');
-            document.getElementById('editDayModal').classList.add('flex');
+        window.onEmployeeSelectChange = function() {
+            managerSelectedEmpId = document.getElementById('employeeSelectDropdown').value;
+            renderApp();
         };
 
-        window.closeEditModal = function() {
-            document.getElementById('editDayModal').classList.add('hidden');
-            document.getElementById('editDayModal').classList.remove('flex');
-        };
-
-        window.saveEditedDay = async function() {
-            const empId = dbState.currentUser.role === 'manager' ? managerSelectedEmpId : dbState.currentUser.id;
-            const key = `${empId}_${activeEditingDateStr}`;
-
-            if (dbState.currentUser.role === 'employee' && dbState.attendance[key] && dbState.attendance[key].time) {
-                alert("Ushbu sana uchun ma'lumot allaqachon kiritilgan va uni o'zgartirib bo'lmaydi!");
-                return;
-            }
-
-            const time = document.getElementById('modalEditTime').value;
-            const noUniform = document.getElementById('modalEditUniform').checked;
-            const phone = document.getElementById('modalEditPhone').checked;
-
-            dbState.attendance[key] = { time, noUniform, phone };
-            await saveCloudDb();
-
-            window.closeEditModal();
-            renderDashboard();
-            renderDavomatTable();
-            alert(`${activeEditingDateStr} sanasiga ma'lumot saqlandi! ✅`);
-        };
-
-        window.clearDayRecord = async function() {
-            if (dbState.currentUser.role !== 'manager') return;
-
-            const empId = managerSelectedEmpId;
-            const key = `${empId}_${activeEditingDateStr}`;
-            delete dbState.attendance[key];
-            await saveCloudDb();
-
-            window.closeEditModal();
-            renderDashboard();
-            renderDavomatTable();
-            alert(`${activeEditingDateStr} sanasi ma'lumotlari tozalandi! 🧹`);
-        };
-
-        function renderDavomatTable() {
-            const tbody = document.getElementById('detailedDavomatTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            const empId = dbState.currentUser && dbState.currentUser.role === 'manager' ? managerSelectedEmpId : (dbState.currentUser ? dbState.currentUser.id : '1');
-            const selectedEmp = dbState.employees.find(e => e.id === empId);
-
-            if (dbState.currentUser && dbState.currentUser.role === 'manager' && selectedEmp) {
-                document.getElementById('davomatSubtitleText').textContent = `${selectedEmp.name} uchun kunlik kelish vaqtlari va jarimalar hisobi`;
-            } else {
-                document.getElementById('davomatSubtitleText').textContent = `Kunlik kelish vaqtlaringiz va jarimalaringiz hisobi`;
-            }
-
-            const year = selectedDate.getFullYear();
-            const month = selectedDate.getMonth();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const res = calculateDay(empId, dateStr);
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-3 font-bold text-slate-900 cursor-pointer text-blue-600 hover:underline" onclick="window.openEditDayModal('${dateStr}')">${dateStr} ✏️</td>
-                    <td class="p-3 font-bold text-slate-600">${res.time || '-'}</td>
-                    <td class="p-3">
-                        ${res.uniformFine ? '<span class="px-2 py-0.5 bg-rose-50 text-rose-600 rounded-lg text-[11px] font-bold">Kiymagan (-1/3)</span>' : '<span class="text-emerald-600">Kiydi</span>'}
-                    </td>
-                    <td class="p-3">
-                        ${res.phoneFine ? '<span class="px-2 py-0.5 bg-rose-50 text-rose-600 rounded-lg text-[11px] font-bold">Ishlatgan (-1/3)</span>' : '<span class="text-emerald-600">Ishlatmadi</span>'}
-                    </td>
-                    <td class="p-3">
-                        <span class="px-2.5 py-1 rounded-lg text-xs font-extrabold ${res.isOff ? 'bg-slate-100 text-slate-400' : res.status.includes('kelmadi') ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-700'}">
-                            ${res.status}
-                        </span>
-                    </td>
-                    <td class="p-3 text-right font-extrabold text-emerald-600">${Math.round(res.earned).toLocaleString()} so'm</td>
-                `;
-                tbody.appendChild(tr);
-            }
-        }
-
-        window.changeDate = function(delta) {
-            selectedDate.setMonth(selectedDate.getMonth() + delta);
-            renderDashboard();
-            renderDavomatTable();
-        };
-
-        function renderEmployeesTable() {
-            if (!dbState.currentUser || dbState.currentUser.role !== 'manager') return;
-
-            const tbody = document.getElementById('managerEmployeesTable');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            dbState.employees.forEach(emp => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-3 font-bold text-slate-900">${emp.name} <span class="text-slate-400 text-xs">(${emp.username})</span></td>
-                    <td class="p-3 font-mono text-slate-500">${emp.pass}</td>
-                    <td class="p-3">
-                        <input type="number" value="${emp.wage}" onchange="window.updateEmployeeWage('${emp.id}', this.value)" class="w-28 px-2.5 py-1 rounded-lg border border-slate-200 font-bold bg-slate-50 text-xs text-emerald-700 outline-none focus:ring-2 focus:ring-blue-500">
-                    </td>
-                    <td class="p-3">
-                        <input type="time" value="${emp.customTime || '09:00'}" onchange="window.updateEmployeeTime('${emp.id}', this.value)" class="px-2 py-1 rounded-lg border border-slate-200 font-bold bg-slate-50 text-xs outline-none focus:ring-2 focus:ring-blue-500">
-                    </td>
-                    <td class="p-3">
-                        ${emp.isStudent ? `<span class="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-extrabold">Talaba</span>` : '<span class="text-slate-300">Oddiy</span>'}
-                    </td>
-                    <td class="p-3 text-right">
-                        <button onclick="window.deleteEmployee('${emp.id}')" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        window.updateEmployeeWage = async function(empId, newWage) {
-            if (!dbState.currentUser || dbState.currentUser.role !== 'manager') return;
-            const emp = dbState.employees.find(e => e.id === empId);
-            if (emp) {
-                emp.wage = Number(newWage);
-                await saveCloudDb();
-                renderDashboard();
-                renderDavomatTable();
-                alert(`${emp.name} uchun kunlik maosh ${Number(newWage).toLocaleString()} so'mga o'zgartirildi! ✅`);
-            }
-        };
-
-        window.updateEmployeeTime = async function(empId, newTime) {
-            if (!dbState.currentUser || dbState.currentUser.role !== 'manager') return;
-            const emp = dbState.employees.find(e => e.id === empId);
-            if (emp) {
-                emp.customTime = newTime;
-                await saveCloudDb();
-                alert(`${emp.name} uchun kelish vaqti ${newTime} ga o'zgartirildi! ✅`);
-            }
+        window.onDavomatEmployeeSelectChange = function() {
+            renderApp();
         };
 
         window.openAddModal = function() {
-            if (!dbState.currentUser || dbState.currentUser.role !== 'manager') return;
             document.getElementById('addEmployeeModal').classList.remove('hidden');
             document.getElementById('addEmployeeModal').classList.add('flex');
         };
@@ -1177,61 +619,244 @@
             document.getElementById('addEmployeeModal').classList.remove('flex');
         };
 
-        window.saveNewEmployee = async function() {
-            if (!dbState.currentUser || dbState.currentUser.role !== 'manager') return;
-
+        window.saveNewEmployee = function() {
             const name = document.getElementById('modalEmpName').value.trim();
             const pass = document.getElementById('modalEmpPass').value.trim();
-            const wage = Number(document.getElementById('modalEmpWage').value);
+            const wage = Number(document.getElementById('modalEmpWage').value) || 0;
             const customTime = document.getElementById('modalCustomTime').value;
             const isStudent = document.getElementById('modalIsStudent').checked;
 
-            if (!name || !pass || !wage) return alert('Barcha kataklarni to\'ldiring!');
+            if (!name) return;
+            const newId = String(Date.now());
+            const username = name.toLowerCase().replace(/\s+/g, '');
 
-            const newEmp = {
-                id: Date.now().toString(),
-                username: name.toLowerCase().replace(/\s+/g, ''),
-                name: name,
-                pass: pass,
-                wage: wage,
-                isStudent: isStudent,
-                customTime: customTime || '09:00'
-            };
-
-            dbState.employees.push(newEmp);
-            await saveCloudDb();
+            dbState.employees.push({ id: newId, username, name, pass, wage, isStudent, customTime });
+            saveStateToFirebase();
             window.closeAddModal();
-            renderEmployeesTable();
-            populateEmployeeDropdowns();
-            alert('Yangi xodim qo\'shildi! ✅');
+            renderApp();
         };
 
-        window.deleteEmployee = async function(id) {
-            if (!dbState.currentUser || dbState.currentUser.role !== 'manager') return;
-
-            if (confirm('Xodimni o\'chirishni tasdiqlaysizmi?')) {
-                dbState.employees = dbState.employees.filter(e => e.id !== id);
-                await saveCloudDb();
-                renderEmployeesTable();
-                populateEmployeeDropdowns();
+        window.changeUserPassword = function() {
+            const newPass = document.getElementById('newPasswordInput').value.trim();
+            if (!newPass || !currentUser) return;
+            const emp = dbState.employees.find(e => e.id === currentUser.id);
+            if (emp) {
+                emp.pass = newPass;
+                saveStateToFirebase();
+                alert("Parol muvaffaqiyatli o'zgartirildi!");
+                document.getElementById('newPasswordInput').value = '';
             }
         };
 
-        window.changeUserPassword = async function() {
-            const newP = document.getElementById('newPasswordInput').value.trim();
-            if (!newP) return alert('Parol kiriting!');
+        function renderApp() {
+            if (!currentUser) return;
 
-            if (dbState.currentUser.role === 'manager') {
-                alert('Menejer paroli o\'zgartirildi!');
-            } else {
-                const emp = dbState.employees.find(e => e.id === dbState.currentUser.id);
-                if (emp) {
-                    emp.pass = newP;
-                    await saveCloudDb();
+            const isManager = currentUser.username === 'menejer';
+            document.getElementById('headerUserName').innerText = currentUser.name;
+            document.getElementById('headerUserRole').innerText = isManager ? 'Bosh Menejer' : 'Xodim';
+            document.getElementById('userAvatarText').innerText = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+            // Populate dropdowns
+            const empDropdown = document.getElementById('employeeSelectDropdown');
+            const davDropdown = document.getElementById('davomatEmployeeSelectDropdown');
+            const employeesList = dbState.employees.filter(e => e.username !== 'menejer');
+
+            empDropdown.innerHTML = employeesList.map(e => `<option value="${e.id}" ${e.id === managerSelectedEmpId ? 'selected' : ''}>${e.name}</option>`).join('');
+            davDropdown.innerHTML = employeesList.map(e => `<option value="${e.id}" ${e.id === managerSelectedEmpId ? 'selected' : ''}>${e.name}</option>`).join('');
+
+            const targetEmpId = isManager ? managerSelectedEmpId : currentUser.id;
+            const targetEmp = dbState.employees.find(e => e.id === targetEmpId) || employeesList[0];
+
+            // Welcome banner
+            document.getElementById('welcomeTitle').innerText = `Salom, ${currentUser.name}! 👋`;
+            document.getElementById('welcomeSubtitle').innerText = isManager ? `Boshqaruv paneli (${targetEmp?.name || ''})` : `Xodim shaxsiy kabineti`;
+
+            // Date formatting
+            const year = selectedDate.getFullYear();
+            const month = selectedDate.getMonth();
+            const monthNames = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
+            document.getElementById('selectedDateLabel').innerText = `${monthNames[month]} ${year}`;
+            document.getElementById('currentFullDateText').innerText = new Date().toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            // Employee action container toggle
+            const actionContainer = document.getElementById('employeeActionContainer');
+            if (!isManager) {
+                actionContainer.classList.remove('hidden');
+                const todayStr = new Date().toISOString().split('T')[0];
+                const existingToday = dbState.attendance[`${currentUser.id}_${todayStr}`];
+                if (existingToday) {
+                    document.getElementById('attendanceStatusBadge').classList.remove('hidden');
+                    document.getElementById('employeeTimeInput').value = existingToday.time;
+                    document.getElementById('employeeUniformCheck').checked = existingToday.noUniform;
+                    document.getElementById('employeePhoneCheck').checked = existingToday.phone;
+                } else {
+                    document.getElementById('attendanceStatusBadge').classList.add('hidden');
                 }
-                alert('Parolingiz muvaffaqiyatli saqlandi! ✅');
+            } else {
+                actionContainer.classList.add('hidden');
             }
-            document.getElementById('newPasswordInput').value = '';
+
+            // Calculate stats for selected month & target employee
+            let workedDays = 0;
+            let lateDays = 0;
+            let uniformFinesCount = 0;
+            let phoneFinesCount = 0;
+            let totalMonthEarnings = 0;
+
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const deadlineTime = targetEmp?.customTime || '09:00';
+            const dailyWage = targetEmp?.wage || 0;
+
+            let detailedHtml = '';
+            let calendarHtml = '';
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateObj = new Date(year, month, d);
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dayOfWeek = dateObj.getDay();
+                const recordKey = `${targetEmpId}_${dateStr}`;
+                const record = dbState.attendance[recordKey];
+
+                let dayStatus = 'absent';
+                let dayWage = 0;
+
+                if (dayOfWeek === 0) {
+                    // Sunday off
+                    calendarHtml += `<div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-center text-xs"><p class="font-bold text-slate-300">${d}</p><p class="text-[9px] text-slate-300">Dam</p></div>`;
+                    continue;
+                }
+
+                if (record) {
+                    workedDays++;
+                    let isLate = record.time > deadlineTime;
+                    if (isLate) lateDays++;
+
+                    let deductions = 0;
+                    if (record.noUniform) { uniformFinesCount++; deductions += 1/3; }
+                    if (record.phone) { phoneFinesCount++; deductions += 1/3; }
+
+                    let effectiveDays = Math.max(0, 1 - deductions);
+                    dayWage = Math.round(dailyWage * effectiveDays);
+                    totalMonthEarnings += dayWage;
+
+                    calendarHtml += `<div onclick="window.openEditModalForDate('${dateStr}')" class="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center text-xs cursor-pointer hover:bg-emerald-100 transition-all">
+                        <p class="font-black text-emerald-800">${d}</p>
+                        <p class="text-[10px] font-bold text-emerald-600">${record.time}</p>
+                    </div>`;
+
+                    detailedHtml += `<tr>
+                        <td class="p-3 font-bold">${dateStr}</td>
+                        <td class="p-3">${record.time} ${isLate ? '<span class="text-rose-500 text-[10px] font-bold">(Kechikdi)</span>' : ''}</td>
+                        <td class="p-3">${record.noUniform ? '<span class="text-rose-500 font-bold">Yo\'q (-1/3)</span>' : '<span class="text-emerald-600">Bor</span>'}</td>
+                        <td class="p-3">${record.phone ? '<span class="text-rose-500 font-bold">Ishlatgan (-1/3)</span>' : '<span class="text-emerald-600">Yo\'q</span>'}</td>
+                        <td class="p-3">${deductions > 0 ? `<span class="text-rose-500 font-bold">Jarima (-${Math.round(deductions*100)}%)</span>` : '<span class="text-emerald-600 font-bold">Ajoyib</span>'}</td>
+                        <th class="p-3 text-right text-slate-900">${dayWage.toLocaleString()} so'm</th>
+                    </tr>`;
+                } else {
+                    calendarHtml += `<div onclick="window.openEditModalForDate('${dateStr}')" class="p-2.5 rounded-2xl bg-white border border-slate-200 text-center text-xs cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all">
+                        <p class="font-bold text-slate-700">${d}</p>
+                        <p class="text-[9px] text-slate-400">Kiritilmagan</p>
+                    </div>`;
+
+                    detailedHtml += `<tr class="text-slate-400">
+                        <td class="p-3 font-bold">${dateStr}</td>
+                        <td class="p-3">-</td>
+                        <td class="p-3">-</td>
+                        <td class="p-3">-</td>
+                        <td class="p-3">Kiritilmagan</td>
+                        <td class="p-3 text-right">0 so'm</td>
+                    </tr>`;
+                }
+            }
+
+            document.getElementById('statWorkedDays').innerText = workedDays;
+            document.getElementById('statLateDays').innerText = lateDays;
+            document.getElementById('statUniformFines').innerText = uniformFinesCount;
+            document.getElementById('statPhoneFines').innerText = phoneFinesCount;
+            document.getElementById('totalEarningsAmount').innerText = `${totalMonthEarnings.toLocaleString()} so'm`;
+            document.getElementById('amberWageDisplay').innerText = `${totalMonthEarnings.toLocaleString()} so'm`;
+
+            document.getElementById('calendarGrid').innerHTML = calendarHtml;
+            document.getElementById('detailedDavomatTableBody').innerHTML = detailedHtml;
+
+            // Render Employees management table for Manager
+            if (isManager) {
+                let empTableHtml = '';
+                dbState.employees.filter(e => e.username !== 'menejer').forEach(emp => {
+                    empTableHtml += `<tr>
+                        <td class="p-3 font-bold text-slate-900">${emp.name} <span class="text-slate-400 text-[10px]">(${emp.username})</span></td>
+                        <td class="p-3">${emp.pass}</td>
+                        <td class="p-3">${emp.wage.toLocaleString()} so'm</td>
+                        <td class="p-3">${emp.customTime}</td>
+                        <td class="p-3">${emp.isStudent ? 'Ha (Talaba)' : "Yo'q"}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="window.deleteEmployee('${emp.id}')" class="text-rose-500 hover:text-rose-700 font-bold">O'chirish</button>
+                        </td>
+                    </tr>`;
+                });
+                document.getElementById('managerEmployeesTable').innerHTML = empTableHtml;
+            }
+        }
+
+        window.openEditModalForDate = function(dateStr) {
+            activeModalDateStr = dateStr;
+            const targetEmpId = currentUser.username === 'menejer' ? managerSelectedEmpId : currentUser.id;
+            const recordKey = `${targetEmpId}_${dateStr}`;
+            const record = dbState.attendance[recordKey];
+
+            document.getElementById('editModalTitle').innerText = `Sana: ${dateStr}`;
+            if (record) {
+                document.getElementById('modalEditTime').value = record.time;
+                document.getElementById('modalEditUniform').checked = record.noUniform;
+                document.getElementById('modalEditPhone').checked = record.phone;
+            } else {
+                document.getElementById('modalEditTime').value = '09:00';
+                document.getElementById('modalEditUniform').checked = false;
+                document.getElementById('modalEditPhone').checked = false;
+            }
+
+            document.getElementById('editDayModal').classList.remove('hidden');
+            document.getElementById('editDayModal').classList.add('flex');
+        };
+
+        window.closeEditModal = function() {
+            document.getElementById('editDayModal').classList.add('hidden');
+            document.getElementById('editDayModal').classList.remove('flex');
+            activeModalDateStr = null;
+        };
+
+        window.saveEditedDay = function() {
+            if (!activeModalDateStr) return;
+            const targetEmpId = currentUser.username === 'menejer' ? managerSelectedEmpId : currentUser.id;
+            const recordKey = `${targetEmpId}_${activeModalDateStr}`;
+
+            const time = document.getElementById('modalEditTime').value;
+            const noUniform = document.getElementById('modalEditUniform').checked;
+            const phone = document.getElementById('modalEditPhone').checked;
+
+            dbState.attendance[recordKey] = { time, noUniform, phone };
+            saveStateToFirebase();
+            window.closeEditModal();
+            renderApp();
+        };
+
+        window.clearDayRecord = function() {
+            if (!activeModalDateStr) return;
+            const targetEmpId = currentUser.username === 'menejer' ? managerSelectedEmpId : currentUser.id;
+            const recordKey = `${targetEmpId}_${activeModalDateStr}`;
+
+            delete dbState.attendance[recordKey];
+            saveStateToFirebase();
+            window.closeEditModal();
+            renderApp();
+        };
+
+        window.deleteEmployee = function(empId) {
+            if (confirm("Haqiqatan ham bu xodimni o'chirmoqchimisiz?")) {
+                dbState.employees = dbState.employees.filter(e => e.id !== empId);
+                saveStateToFirebase();
+                renderApp();
+            }
         };
     </script>
 </body>
