@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabel va Davomat Tizimi (Onlayn)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex">
+
+    <!-- Auth / Login View -->
+    <div id="authView" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 p-4">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
+            <div class="text-center mb-8">
+                <div class="inline-flex p-4 bg-blue-600 text-white rounded-2xl text-3xl mb-3 shadow-lg shadow-blue-200">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-900">Tabel va Davomat Tizimi</h1>
+                <p class="text-xs text-slate-500 mt-1">Onlayn Bulutli Tizim</p>
+            </div>
+
+            <form onsubmit="window.handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Login (Foydalanuvchi ismi)</label>
+                    <input type="text" id="loginUsername" required placeholder="Masalan: akmal yoki menejer" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium bg-slate-50 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Parol</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium bg-slate-50 text-sm">
+                </div>
+
+                <div id="loginError" class="hidden text-xs text-rose-500 font-semibold text-center">
+                    Login yoki parol noto'g'ri!
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98]">
+                    Kirish 🚀
+                </button>
+            </form>
+
+            <div class="mt-6 pt-4 border-t border-slate-100 text-center text-xs text-slate-400">
+                <p class="font-medium">Test loginlari:</p>
+                <p>Menejer: <strong class="text-slate-600">menejer</strong> / Parol: <strong class="text-slate-600">12345</strong></p>
+                <p>Akmal: <strong class="text-slate-600">akmal</strong> / Parol: <strong class="text-slate-600">12345</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Sidebar Layout -->
+    <div id="appView" class="hidden w-full min-h-screen flex flex-col md:flex-row">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full md:w-64 bg-white border-r border-slate-200 p-6 flex flex-col justify-between shrink-0">
+            <div>
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="p-2.5 bg-blue-600 text-white rounded-xl shadow-md">
+                        <i class="fa-solid fa-calendar-check text-xl"></i>
+                    </div>
+                    <span class="text-xl font-extrabold text-slate-900 tracking-tight">Tabel (Onlayn)</span>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="space-y-2">
+                    <button id="navTabelBtn" onclick="window.switchTab('tabel')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-lg shadow-blue-200 transition-all">
+                        <i class="fa-solid fa-calendar-days text-base"></i>
+                        <span>Tabel</span>
+                    </button>
+
+                    <button id="navDavomatBtn" onclick="window.switchTab('davomat')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all">
+                        <i class="fa-solid fa-clipboard-user text-base"></i>
+                        <span>Davomat</span>
+                    </button>
+                    
+                    <button id="navEmployeesBtn" onclick="window.switchTab('employees')" class="w-full hidden flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all">
+                        <i class="fa-solid fa-users text-base"></i>
+                        <span>Xodimlar Boshqaruvi</span>
+                    </button>
+
+                    <button id="navSettingsBtn" onclick="window.switchTab('settings')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all">
+                        <i class="fa-solid fa-key text-base"></i>
+                        <span>Parol O'zgartirish</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="pt-6 border-t border-slate-100">
+                <button onclick="window.handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-rose-600 hover:bg-rose-50 transition-all">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Chiqish</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+            
+            <!-- Top Navigation / User Header -->
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-xl font-extrabold text-slate-900" id="mainHeaderTitle">Tabel</h2>
+                    <p class="text-xs font-semibold text-slate-400" id="currentFullDateText">Bugun</p>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl shadow-sm border border-slate-200">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs" id="userAvatarText">
+                            BM
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs font-bold text-slate-900" id="headerUserName">Bosh Menejer</p>
+                            <p class="text-[10px] font-semibold text-slate-400" id="headerUserRole">Menejer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 1: TABEL VIEW -->
+            <div id="tabTabel" class="space-y-6">
+                
+                <!-- Blue Gradient Welcome Banner -->
+                <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-blue-500/10 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div class="space-y-2 z-10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+                                👋
+                            </div>
+                            <h1 id="welcomeTitle" class="text-2xl md:text-3xl font-extrabold">Salom!</h1>
+                        </div>
+                        <p id="welcomeSubtitle" class="text-xs md:text-sm text-blue-100 font-medium">Tizim paneli</p>
+                    </div>
+
+                    <div class="bg-white/10 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/20 text-right w-full md:w-auto z-10">
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-blue-100 flex items-center justify-end gap-1.5">
+                            <i class="fa-solid fa-lock text-xs"></i> Tanlangan oy uchun summa
+                        </p>
+                        <p id="totalEarningsAmount" class="text-2xl md:text-3xl font-black mt-0.5 tracking-tight">0 so'm</p>
+                    </div>
+
+                    <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                </div>
+
+                <!-- Xodim uchun Asosiy "Keldim" paneli -->
+                <div id="employeeActionContainer" class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 rounded-3xl shadow-xl space-y-5 border border-slate-800 hidden">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+                        <div>
+                            <span class="text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-800/50">
+                                Bugungi davomat
+                            </span>
+                            <h3 class="text-lg font-extrabold mt-2 text-white">Ishga kelganingizni tasdiqlang</h3>
+                        </div>
+                        <span id="attendanceStatusBadge" class="hidden text-xs font-bold px-3.5 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            ✓ Bugun ro'yxatdan o'tgansiz
+                        </span>
+                    </div>
+
+                    <div id="checkInFormGroup" class="space-y-4">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                            <button id="setNowTimeBtn" onclick="window.setCurrentTimeNow()" class="px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-black rounded-2xl text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all shrink-0">
+                                <i class="fa-solid fa-location-dot text-base"></i>
+                                <span>KELDIM</span>
+                            </button>
+
+                            <div class="flex-1">
+                                <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Kelgan vaqtingiz:</label>
+                                <input type="time" id="employeeTimeInput" value="09:00" class="w-full px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800/80 text-white font-extrabold text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition-all">
+                                <input type="checkbox" id="employeeUniformCheck" class="w-4 h-4 text-emerald-500 rounded border-slate-600 focus:ring-emerald-500 bg-slate-700">
+                                <span class="text-xs font-bold text-slate-200">Forma kiymadim (-1/3 jarima)</span>
+                            </label>
+
+                            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition-all">
+                                <input type="checkbox" id="employeePhoneCheck" class="w-4 h-4 text-emerald-500 rounded border-slate-600 focus:ring-emerald-500 bg-slate-700">
+                                <span class="text-xs font-bold text-slate-200">Telefondan foydalandim (-1/3 jarima)</span>
+                            </label>
+                        </div>
+
+                        <div class="pt-2">
+                            <button id="submitAttendanceBtn" onclick="window.submitEmployeeAttendance()" class="w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-blue-600/30 transition-all">
+                                Saqlash va Tasdiqlash ✅
+                            </button>
+                        </div>
+                    </div>
+
+                    <p id="attendanceNoticeText" class="text-[11px] font-medium text-slate-400">
+                        *Eslatma: Kelgan vaqtingizni bir kunda faqat 1 marotaba kiritish mumkin. Keyinroq qayta o'zgartirib bo'lmaydi.
+                    </p>
+                </div>
+
+                <!-- Controls & Stats Cards Grid -->
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                    <div class="flex items-center gap-3 w-full lg:w-auto">
+                        <div class="flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-sm">
+                            <button onclick="window.changeDate(-1)" class="text-slate-500 hover:text-blue-600 font-extrabold text-sm p-1">◀</button>
+                            <span id="selectedDateLabel" class="text-xs font-bold text-slate-700 px-2 min-w-[110px] text-center">Joriy Oy</span>
+                            <button onclick="window.changeDate(1)" class="text-slate-500 hover:text-blue-600 font-extrabold text-sm p-1">▶</button>
+                        </div>
+
+                        <!-- Menejer uchun Xodim Tanlash -->
+                        <select id="employeeSelectDropdown" onchange="window.onEmployeeSelectChange()" class="hidden bg-white border border-slate-200 text-slate-800 text-xs font-bold rounded-2xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto flex-1">
+                        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm shadow-md shadow-blue-200">
+                                <i class="fa-solid fa-calendar-check"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                                    <i class="fa-solid fa-check"></i> Ishlagan
+                                </p>
+                                <p id="statWorkedDays" class="text-lg font-extrabold text-slate-800">0</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-sm shadow-md shadow-amber-200">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-rose-500 flex items-center gap-1">
+                                    <i class="fa-solid fa-clock"></i> Kechikish
+                                </p>
+                                <p id="statLateDays" class="text-lg font-extrabold text-slate-800">0</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center text-sm shadow-md shadow-rose-200">
+                                <i class="fa-solid fa-shirt"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-500 flex items-center gap-1">
+                                    <i class="fa-solid fa-shirt"></i> Forma kiymagan
+                                </p>
+                                <p id="statUniformFines" class="text-lg font-extrabold text-slate-800">0</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center text-sm shadow-md shadow-sky-200">
+                                <i class="fa-solid fa-mobile-screen-button"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-500 flex items-center gap-1">
+                                    <i class="fa-solid fa-mobile"></i> Telefon ishlatgan
+                                </p>
+                                <p id="statPhoneFines" class="text-lg font-extrabold text-slate-800">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50/80 border border-amber-200 px-6 py-3.5 rounded-2xl flex items-center gap-3 text-amber-900 shadow-sm">
+                    <i class="fa-solid fa-lock text-amber-600 text-sm"></i>
+                    <p class="text-xs font-bold">
+                        Hisoblangan ish haqi: <span id="amberWageDisplay" class="text-emerald-600 font-extrabold text-sm ml-1">0 so'm</span>
+                    </p>
+                </div>
+
+                <!-- Monthly Calendar Grid Section -->
+                <div class="bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
+                    <div class="flex justify-between items-center flex-wrap gap-2">
+                        <h3 class="text-xs font-bold text-slate-500 flex items-center gap-2">
+                            <i class="fa-solid fa-calendar text-blue-600"></i> Oylik kalendar
+                        </h3>
+                        <p class="text-[11px] text-blue-600 font-bold bg-blue-50 px-3 py-1 rounded-full">
+                            💡 Vaqt kiritish uchun kiritilmagan kunga bosing (bir marta saqlangach o'zgartirib bo'lmaydi)
+                        </p>
+                    </div>
+
+                    <div class="max-w-xl mx-auto">
+                        <div class="grid grid-cols-7 gap-2 text-center text-[11px] font-bold text-rose-400 mb-2">
+                            <span>Yak</span>
+                            <span class="text-slate-400">Dus</span>
+                            <span class="text-slate-400">Ses</span>
+                            <span class="text-slate-400">Cho</span>
+                            <span class="text-slate-400">Pay</span>
+                            <span class="text-slate-400">Jum</span>
+                            <span class="text-slate-400">Sha</span>
+                        </div>
+
+                        <div id="calendarGrid" class="grid grid-cols-7 gap-2">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TAB 2: DAVOMAT VIEW -->
+            <div id="tabDavomat" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <h3 class="text-base font-extrabold text-slate-900">Batafsil Davomat Jadvali</h3>
+                            <p class="text-xs text-slate-400" id="davomatSubtitleText">Kunlik kelish vaqtlari va jarimalar hisobi</p>
+                        </div>
+
+                        <div id="managerDavomatSelectContainer" class="hidden flex items-center gap-2">
+                            <label class="text-xs font-bold text-slate-500">Xodimni tanlang:</label>
+                            <select id="davomatEmployeeSelectDropdown" onchange="window.onDavomatEmployeeSelectChange()" class="bg-slate-50 border border-slate-200 text-slate-800 text-xs font-bold rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-400 uppercase tracking-wider font-bold">
+                                    <th class="p-3 rounded-l-xl">Sana</th>
+                                    <th class="p-3">Kelish Vaqti</th>
+                                    <th class="p-3">Forma Statusi</th>
+                                    <th class="p-3">Telefon Statusi</th>
+                                    <th class="p-3">Holati / Jarima</th>
+                                    <th class="p-3 text-right rounded-r-xl">Hisoblangan Maosh</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailedDavomatTableBody" class="divide-y divide-slate-100 font-semibold text-slate-700">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: EMPLOYEES MANAGEMENT -->
+            <div id="tabEmployees" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-base font-extrabold text-slate-900">Xodimlar Ro'yxati</h3>
+                            <p class="text-xs text-slate-400">Bosh Menejer yangi xodimlarni qo'shishi, oylik va kelish vaqtini belgilashi mumkin</p>
+                        </div>
+                        <button onclick="window.openAddModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-200">
+                            + Yangi xodim qo'shish
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-400 uppercase tracking-wider font-bold">
+                                    <th class="p-3 rounded-l-xl">Ism / Login</th>
+                                    <th class="p-3">Parol</th>
+                                    <th class="p-3">Kunlik Maosh (so'm)</th>
+                                    <th class="p-3">Belgilangan Kelish Vaqti</th>
+                                    <th class="p-3">Talaba Rejimi</th>
+                                    <th class="p-3 text-right rounded-r-xl">Amallar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="managerEmployeesTable" class="divide-y divide-slate-100 font-semibold text-slate-700">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: PASSWORD SETTINGS VIEW -->
+            <div id="tabSettings" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm max-w-md space-y-4">
+                    <h3 class="text-base font-extrabold text-slate-900">Parolni O'zgartirish</h3>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Yangi Parol</label>
+                        <input type="password" id="newPasswordInput" placeholder="Yangi parolni kiriting" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button onclick="window.changeUserPassword()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-200">
+                        Parolni Saqlash
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal: Kunlik vaqt va jarimalarni kiritish / tahrirlash -->
+    <div id="editDayModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-md space-y-4">
+            <h3 class="text-lg font-extrabold text-slate-900" id="editModalTitle">Sanani kiritish</h3>
+            
+            <p id="modalLockNotice" class="hidden text-xs font-bold text-amber-600 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+                🔒 Ushbu sana bo'yicha ma'lumot allaqachon kiritilgan va uni qayta o'zgartirib bo'lmaydi.
+            </p>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">Kelish vaqti:</label>
+                <input type="time" id="modalEditTime" value="09:00" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold bg-slate-50 text-sm outline-none">
+            </div>
+
+            <div class="flex items-center gap-2 pt-2">
+                <input type="checkbox" id="modalEditUniform" class="w-4 h-4 text-blue-600 rounded border-slate-300">
+                <label for="modalEditUniform" class="text-xs font-semibold text-slate-700 cursor-pointer">Forma kiymagan (-1/3 jarima)</label>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1">
+                <input type="checkbox" id="modalEditPhone" class="w-4 h-4 text-blue-600 rounded border-slate-300">
+                <label for="modalEditPhone" class="text-xs font-semibold text-slate-700 cursor-pointer">Telefon ishlatgan (-1/3 jarima)</label>
+            </div>
+
+            <div class="flex justify-between gap-2 pt-4">
+                <button id="modalDeleteBtn" onclick="window.clearDayRecord()" class="px-3 py-2 bg-rose-50 text-rose-600 font-bold rounded-xl text-xs hover:bg-rose-100">O'chirish</button>
+                <div class="flex gap-2">
+                    <button onclick="window.closeEditModal()" class="px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs">Bekor qilish</button>
+                    <button id="modalSaveBtn" onclick="window.saveEditedDay()" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-md">Saqlash</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Yangi Xodim Qo'shish -->
+    <div id="addEmployeeModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-md space-y-4">
+            <h3 class="text-lg font-extrabold text-slate-900">Yangi Xodim Qo'shish</h3>
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">Ism va Login</label>
+                <input type="text" id="modalEmpName" placeholder="Masalan: Sardor" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 outline-none">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">Parol</label>
+                <input type="password" id="modalEmpPass" value="12345" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 outline-none">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">Kunlik Maosh (so'm)</label>
+                <input type="number" id="modalEmpWage" value="444231" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 outline-none">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">Menejer belgilagan kelish vaqti</label>
+                <input type="time" id="modalCustomTime" value="09:00" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 outline-none">
+            </div>
+
+            <div class="flex items-center gap-2 pt-1">
+                <input type="checkbox" id="modalIsStudent" class="w-4 h-4 text-blue-600 rounded border-slate-300">
+                <label for="modalIsStudent" class="text-xs font-bold text-slate-700">Talaba (O'qishdan keyin 14:00+ kelishi mumkin)</label>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-4">
+                <button onclick="window.closeAddModal()" class="px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs">Bekor qilish</button>
+                <button onclick="window.saveNewEmployee()" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-md">Saqlash</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK & App Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOcWrX6D67op8Xmvosi17FGkr2pqS_Zgs",
+            authDomain: "tabel-28960.firebaseapp.com",
+            projectId: "tabel-28960",
+            storageBucket: "tabel-28960.appspot.com",
+            messagingSenderId: "551556121148",
+            appId: "1:551556121148:web:0f745b7375db3a62703939",
+            measurementId: "G-85NBEC4RCW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Initial default test data (Akmal Sentyabr 2026 3 late days)
+        const initialAttendance = {};
+        for (let d = 1; d <= 30; d++) {
+            const dateStr = `2026-09-${String(d).padStart(2, '0')}`;
+            const dayOfWeek = new Date(dateStr).getDay();
+            if (dayOfWeek !== 0) {
+                if (d === 2) {
+                    initialAttendance[`1_${dateStr}`] = { time: '09:25', noUniform: false, phone: false };
+                } else if (d === 10) {
+                    initialAttendance[`1_${dateStr}`] = { time: '09:35', noUniform: false, phone: false };
+                } else if (d === 18) {
+                    initialAttendance[`1_${dateStr}`] = { time: '09:40', noUniform: false, phone: false };
+                } else {
+                    initialAttendance[`1_${dateStr}`] = { time: '08:55', noUniform: false, phone: false };
+                }
+            }
+        }
+
+        const defaultDb = {
+            employees: [
+                { id: '1', username: 'akmal', name: 'Akmal Tursunov', pass: '12345', wage: 444231, isStudent: false, customTime: '09:00' },
+                { id: '2', username: 'sardor', name: 'Sardor Rahimov', pass: '12345', wage: 150000, isStudent: true, customTime: '14:30' }
+            ],
+            attendance: initialAttendance,
+            currentUser: null
+        };
+
+        let dbState = defaultDb;
+        let selectedDate = new Date(); 
+        let managerSelectedEmpId = '1';
+        let activeEditingDateStr = '';
+
+        // Firestore real-time listener sync
+        const docRef = doc(db, "tabel_system", "main_data");
+
+        async function initCloudSync() {
+            try {
+                const snap = await getDoc(docRef);
+                if (!snap.exists()) {
+                    await setDoc(docRef, defaultDb);
+                }
+            } catch (err) {
+                console.error("Cloud init error:", err);
+            }
+
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data && data.employees) {
+                        dbState.employees = data.employees;
+                        dbState.attendance = data.attendance || {};
+                        if (dbState.currentUser && dbState.currentUser.role === 'employee') {
+                            const latestEmp = dbState.employees.find(e => e.id === dbState.currentUser.id);
+                            if (latestEmp) dbState.currentUser.name = latestEmp.name;
+                        }
+                        renderDashboard();
+                        renderDavomatTable();
+                        if (dbState.currentUser && dbState.currentUser.role === 'manager') {
+                            renderEmployeesTable();
+                        }
+                        if (dbState.currentUser && dbState.currentUser.role === 'employee') {
+                            checkTodayAttendanceStatus();
+                        }
+                    }
+                }
+            });
+        }
+
+        async function saveCloudDb() {
+            try {
+                await setDoc(docRef, {
+                    employees: dbState.employees,
+                    attendance: dbState.attendance
+                });
+            } catch (err) {
+                console.error("Cloud save error:", err);
+            }
+        }
+
+        window.onload = function() {
+            updateDateHeader();
+            initCloudSync().then(() => {
+                const savedUser = localStorage.getItem('tabel_current_user');
+                if (savedUser) {
+                    dbState.currentUser = JSON.parse(savedUser);
+                    showApp();
+                } else {
+                    showAuth();
+                }
+            });
+        };
+
+        function updateDateHeader() {
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            document.getElementById('currentFullDateText').textContent = new Date().toLocaleDateString('uz-UZ', options);
+        }
+
+        window.handleLogin = function(e) {
+            e.preventDefault();
+            const u = document.getElementById('loginUsername').value.trim().toLowerCase();
+            const p = document.getElementById('loginPassword').value.trim();
+
+            if (u === 'menejer' && p === '12345') {
+                dbState.currentUser = { role: 'manager', username: 'menejer', name: 'Bosh Menejer' };
+                localStorage.setItem('tabel_current_user', JSON.stringify(dbState.currentUser));
+                showApp();
+                return;
+            }
+
+            const emp = dbState.employees.find(e => e.username.toLowerCase() === u && e.pass === p);
+            if (emp) {
+                dbState.currentUser = { role: 'employee', id: emp.id, username: emp.username, name: emp.name };
+                localStorage.setItem('tabel_current_user', JSON.stringify(dbState.currentUser));
+                showApp();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        };
+
+        window.handleLogout = function() {
+            dbState.currentUser = null;
+            localStorage.removeItem('tabel_current_user');
+            showAuth();
+        };
+
+        function showAuth() {
+            document.getElementById('authView').classList.remove('hidden');
+            document.getElementById('appView').classList.add('hidden');
+        }
+
+        function getTodayStr() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        window.setCurrentTimeNow = function() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('employeeTimeInput').value = `${h}:${m}`;
+        };
+
+        function checkTodayAttendanceStatus() {
+            if (!dbState.currentUser || dbState.currentUser.role === 'manager') return;
+
+            const todayStr = getTodayStr();
+            const key = `${dbState.currentUser.id}_${todayStr}`;
+            const rec = dbState.attendance[key];
+
+            const timeInput = document.getElementById('employeeTimeInput');
+            const uniformCheck = document.getElementById('employeeUniformCheck');
+            const phoneCheck = document.getElementById('employeePhoneCheck');
+            const submitBtn = document.getElementById('submitAttendanceBtn');
+            const setNowBtn = document.getElementById('setNowTimeBtn');
+            const badge = document.getElementById('attendanceStatusBadge');
+            const noticeText = document.getElementById('attendanceNoticeText');
+
+            if (rec && rec.time) {
+                timeInput.value = rec.time;
+                timeInput.disabled = true;
+                uniformCheck.checked = !!rec.noUniform;
+                uniformCheck.disabled = true;
+                phoneCheck.checked = !!rec.phone;
+                phoneCheck.disabled = true;
+
+                submitBtn.disabled = true;
+                submitBtn.className = "w-full sm:w-auto px-8 py-3 bg-slate-700 text-slate-400 font-bold rounded-xl text-xs cursor-not-allowed";
+                submitBtn.textContent = "Bugun uchun saqlangan 🔒";
+
+                if (setNowBtn) {
+                    setNowBtn.disabled = true;
+                    setNowBtn.className = "px-6 py-3.5 bg-slate-800 text-slate-500 font-bold rounded-2xl text-sm cursor-not-allowed shrink-0";
+                }
+
+                if (badge) badge.classList.remove('hidden');
+                if (noticeText) {
+                    noticeText.textContent = "*Siz bugungi kelgan vaqtingizni belgilab bo'lgansiz. Bir kunda faqat 1 marotaba kiritish mumkin.";
+                    noticeText.className = "text-[11px] font-bold text-amber-400";
+                }
+            } else {
+                timeInput.disabled = false;
+                uniformCheck.disabled = false;
+                phoneCheck.disabled = false;
+
+                submitBtn.disabled = false;
+                submitBtn.className = "w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-blue-600/30 transition-all";
+                submitBtn.textContent = "Saqlash va Tasdiqlash ✅";
+
+                if (setNowBtn) {
+                    setNowBtn.disabled = false;
+                    setNowBtn.className = "px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-black rounded-2xl text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all shrink-0";
+                }
+
+                if (badge) badge.classList.add('hidden');
+                if (noticeText) {
+                    noticeText.textContent = "*Eslatma: Kelgan vaqtingizni bir kunda faqat 1 marotaba kiritish mumkin. Keyinroq qayta o'zgartirib bo'lmaydi.";
+                    noticeText.className = "text-[11px] font-medium text-slate-400";
+                }
+            }
+        }
+
+        function showApp() {
+            document.getElementById('authView').classList.add('hidden');
+            document.getElementById('appView').classList.remove('hidden');
+
+            const isManager = dbState.currentUser.role === 'manager';
+            document.getElementById('headerUserName').textContent = dbState.currentUser.name;
+            document.getElementById('headerUserRole').textContent = isManager ? 'Menejer' : 'Xodim';
+            document.getElementById('userAvatarText').textContent = isManager ? 'BM' : dbState.currentUser.name.substring(0, 2).toUpperCase();
+
+            document.getElementById('welcomeTitle').textContent = `Salom, ${dbState.currentUser.name}!`;
+            document.getElementById('welcomeSubtitle').textContent = isManager ? 'Menejer paneli' : 'Xodim paneli';
+
+            const empSelect = document.getElementById('employeeSelectDropdown');
+            const davomatSelectContainer = document.getElementById('managerDavomatSelectContainer');
+
+            if (isManager) {
+                empSelect.classList.remove('hidden');
+                davomatSelectContainer.classList.remove('hidden');
+                davomatSelectContainer.classList.add('flex');
+                document.getElementById('employeeActionContainer').classList.add('hidden');
+                
+                const navEmpBtn = document.getElementById('navEmployeesBtn');
+                navEmpBtn.classList.remove('hidden');
+                navEmpBtn.classList.add('flex');
+
+                populateEmployeeDropdowns();
+            } else {
+                empSelect.classList.add('hidden');
+                davomatSelectContainer.classList.add('hidden');
+                davomatSelectContainer.classList.remove('flex');
+                document.getElementById('employeeActionContainer').classList.remove('hidden');
+
+                const navEmpBtn = document.getElementById('navEmployeesBtn');
+                navEmpBtn.classList.add('hidden');
+                navEmpBtn.classList.remove('flex');
+
+                managerSelectedEmpId = dbState.currentUser.id;
+                window.setCurrentTimeNow();
+                checkTodayAttendanceStatus();
+            }
+
+            window.switchTab('tabel');
+        }
+
+        function populateEmployeeDropdowns() {
+            const select1 = document.getElementById('employeeSelectDropdown');
+            const select2 = document.getElementById('davomatEmployeeSelectDropdown');
+            select1.innerHTML = '';
+            select2.innerHTML = '';
+
+            dbState.employees.forEach(emp => {
+                const opt1 = document.createElement('option');
+                opt1.value = emp.id;
+                opt1.textContent = emp.name;
+                select1.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = emp.id;
+                opt2.textContent = emp.name;
+                select2.appendChild(opt2);
+            });
+
+            if (dbState.employees.length > 0) {
+                if (!dbState.employees.some(e => e.id === managerSelectedEmpId)) {
+                    managerSelectedEmpId = dbState.employees[0].id;
+                }
+                select1.value = managerSelectedEmpId;
+                select2.value = managerSelectedEmpId;
+            }
+        }
+
+        window.onEmployeeSelectChange = function() {
+            managerSelectedEmpId = document.getElementById('employeeSelectDropdown').value;
+            const s2 = document.getElementById('davomatEmployeeSelectDropdown');
+            if (s2) s2.value = managerSelectedEmpId;
+            renderDashboard();
+            renderDavomatTable();
+        };
+
+        window.onDavomatEmployeeSelectChange = function() {
+            managerSelectedEmpId = document.getElementById('davomatEmployeeSelectDropdown').value;
+            const s1 = document.getElementById('employeeSelectDropdown');
+            if (s1) s1.value = managerSelectedEmpId;
+            renderDashboard();
+            renderDavomatTable();
+        };
+
+        window.switchTab = function(tabName) {
+            if (tabName === 'employees' && dbState.currentUser.role !== 'manager') {
+                alert('Sizda ushbu bo\'limga kirish vakolati yo\'q!');
+                return;
+            }
+
+            document.getElementById('tabTabel').classList.add('hidden');
+            document.getElementById('tabDavomat').classList.add('hidden');
+            document.getElementById('tabEmployees').classList.add('hidden');
+            document.getElementById('tabSettings').classList.add('hidden');
+
+            document.getElementById('navTabelBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all";
+            document.getElementById('navDavomatBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all";
+            document.getElementById('navEmployeesBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all";
+            document.getElementById('navSettingsBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-all";
+
+            if (tabName === 'tabel') {
+                document.getElementById('tabTabel').classList.remove('hidden');
+                document.getElementById('navTabelBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-lg shadow-blue-200 transition-all";
+                document.getElementById('mainHeaderTitle').textContent = 'Tabel';
+                renderDashboard();
+            } else if (tabName === 'davomat') {
+                document.getElementById('tabDavomat').classList.remove('hidden');
+                document.getElementById('navDavomatBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-lg shadow-blue-200 transition-all";
+                document.getElementById('mainHeaderTitle').textContent = 'Davomat';
+                renderDavomatTable();
+            } else if (tabName === 'employees') {
+                document.getElementById('tabEmployees').classList.remove('hidden');
+                document.getElementById('navEmployeesBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-lg shadow-blue-200 transition-all";
+                document.getElementById('mainHeaderTitle').textContent = 'Xodimlar Boshqaruvi';
+                renderEmployeesTable();
+            } else if (tabName === 'settings') {
+                document.getElementById('tabSettings').classList.remove('hidden');
+                document.getElementById('navSettingsBtn').className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-lg shadow-blue-200 transition-all";
+                document.getElementById('mainHeaderTitle').textContent = 'Sozlamalar';
+            }
+        };
+
+        function calculateDay(empId, dateStr) {
+            const emp = dbState.employees.find(e => e.id === empId);
+            if (!emp) return { earned: 0, status: 'Mavjud emas', late: false, uniformFine: false, phoneFine: false };
+
+            const dObj = new Date(dateStr);
+            if (dObj.getDay() === 0) {
+                return { earned: 0, status: 'Yakshanba (Dam)', isOff: true, late: false };
+            }
+
+            const rec = dbState.attendance[`${empId}_${dateStr}`];
+            if (!rec || !rec.time) {
+                return { earned: 0, status: 'Ishga kelmadi', time: '-', late: false, uniformFine: false, phoneFine: false };
+            }
+
+            const [h, m] = rec.time.split(':').map(Number);
+            const totalMins = h * 60 + m;
+
+            if (!emp.isStudent && totalMins >= 840) {
+                return { earned: 0, status: 'Ishga kelmadi (>14:00)', time: rec.time, late: false, uniformFine: false, phoneFine: false };
+            }
+
+            let base = Number(emp.wage) || 0;
+            let deductionsCount = 0;
+            let isLate = false;
+
+            let assignedTimeStr = emp.customTime || '09:00';
+            const [stH, stM] = assignedTimeStr.split(':').map(Number);
+            let targetMins = (stH * 60 + stM) + 20;
+
+            if (totalMins > targetMins) {
+                deductionsCount++;
+                isLate = true;
+            }
+
+            if (rec.noUniform) deductionsCount++;
+            if (rec.phone) deductionsCount++;
+
+            const oneThird = base / 3;
+            const earned = Math.max(0, base - (oneThird * deductionsCount));
+
+            return {
+                earned: earned,
+                status: deductionsCount > 0 ? `Jarima (${deductionsCount}/3)` : 'Kelgan',
+                time: rec.time,
+                late: isLate,
+                uniformFine: !!rec.noUniform,
+                phoneFine: !!rec.phone
+            };
+        }
+
+        function renderDashboard() {
+            const empId = dbState.currentUser && dbState.currentUser.role === 'manager' ? managerSelectedEmpId : (dbState.currentUser ? dbState.currentUser.id : '1');
+            const emp = dbState.employees.find(e => e.id === empId);
+            if (!emp) return;
+
+            const year = selectedDate.getFullYear();
+            const month = selectedDate.getMonth();
+            const labelEl = document.getElementById('selectedDateLabel');
+            if (labelEl) {
+                labelEl.textContent = `${selectedDate.toLocaleString('uz-UZ', { month: 'long', year: 'numeric' })}`;
+            }
+
+            let workedDays = 0, lateDays = 0, uniformFines = 0, phoneFines = 0, totalEarned = 0;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const res = calculateDay(empId, dateStr);
+
+                if (res.status !== 'Ishga kelmadi' && !res.isOff) {
+                    workedDays++;
+                    totalEarned += res.earned;
+                }
+                if (res.late) lateDays++;
+                if (res.uniformFine) uniformFines++;
+                if (res.phoneFine) phoneFines++;
+            }
+
+            document.getElementById('statWorkedDays').textContent = workedDays;
+            document.getElementById('statLateDays').textContent = lateDays;
+            document.getElementById('statUniformFines').textContent = uniformFines;
+            document.getElementById('statPhoneFines').textContent = phoneFines;
+
+            const formattedEarned = `${Math.round(totalEarned).toLocaleString()} so'm`;
+            document.getElementById('amberWageDisplay').textContent = formattedEarned;
+
+            if (dbState.currentUser && dbState.currentUser.role === 'manager') {
+                let grandTotal = 0;
+                dbState.employees.forEach(e => {
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                        grandTotal += calculateDay(e.id, dateStr).earned;
+                    }
+                });
+                document.getElementById('totalEarningsAmount').textContent = `${Math.round(grandTotal).toLocaleString()} so'm`;
+            } else {
+                document.getElementById('totalEarningsAmount').textContent = formattedEarned;
+            }
+
+            renderCalendarGrid(empId, year, month, daysInMonth);
+        }
+
+        function renderCalendarGrid(empId, year, month, daysInMonth) {
+            const grid = document.getElementById('calendarGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                const empty = document.createElement('div');
+                empty.className = "h-10";
+                grid.appendChild(empty);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const res = calculateDay(empId, dateStr);
+
+                const cell = document.createElement('div');
+                cell.className = "h-10 rounded-xl flex flex-col items-center justify-center font-extrabold text-xs transition-all shadow-sm relative cursor-pointer hover:scale-105";
+
+                if (res.isOff) {
+                    cell.className += " bg-slate-100 text-slate-300";
+                } else if (res.status.includes('kelmadi')) {
+                    cell.className += " bg-rose-100 text-rose-500 border border-rose-200";
+                } else if (res.late || res.uniformFine || res.phoneFine) {
+                    cell.className += " bg-amber-100 text-amber-700 border border-amber-200";
+                } else {
+                    cell.className += " bg-emerald-100 text-emerald-700 border border-emerald-200";
+                }
+
+                cell.innerHTML = `<span>${day}</span>`;
+                if (res.time && res.time !== '-') {
+                    cell.innerHTML += `<span class="text-[9px] font-normal tracking-tighter opacity-80">${res.time}</span>`;
+                }
+
+                cell.setAttribute('onclick', `window.openEditDayModal('${dateStr}')`);
+                grid.appendChild(cell);
+            }
+        }
+
+        window.submitEmployeeAttendance = async function() {
+            const todayStr = getTodayStr();
+            const key = `${dbState.currentUser.id}_${todayStr}`;
+
+            if (dbState.attendance[key] && dbState.attendance[key].time) {
+                alert("Siz bugun uchun kelgan vaqtingizni allaqachon belgilagansiz!");
+                return;
+            }
+
+            const time = document.getElementById('employeeTimeInput').value;
+            const noUniform = document.getElementById('employeeUniformCheck').checked;
+            const phone = document.getElementById('employeePhoneCheck').checked;
+
+            dbState.attendance[key] = { time, noUniform, phone };
+            await saveCloudDb();
+
+            checkTodayAttendanceStatus();
+            renderDashboard();
+            renderDavomatTable();
+            alert('Bugungi davomadingiz muvaffaqiyatli saqlandi! ✅');
+        };
+
+        window.openEditDayModal = function(dateStr) {
+            activeEditingDateStr = dateStr;
+            document.getElementById('editModalTitle').textContent = `${dateStr} sanasi uchun ma'lumot kiritish`;
+
+            const empId = dbState.currentUser.role === 'manager' ? managerSelectedEmpId : dbState.currentUser.id;
+            const key = `${empId}_${dateStr}`;
+            const rec = dbState.attendance[key];
+
+            const timeInput = document.getElementById('modalEditTime');
+            const uniformCheck = document.getElementById('modalEditUniform');
+            const phoneCheck = document.getElementById('modalEditPhone');
+            const saveBtn = document.getElementById('modalSaveBtn');
+            const deleteBtn = document.getElementById('modalDeleteBtn');
+            const notice = document.getElementById('modalLockNotice');
+
+            if (dbState.currentUser.role === 'employee' && rec && rec.time) {
+                timeInput.value = rec.time;
+                timeInput.disabled = true;
+                uniformCheck.checked = !!rec.noUniform;
+                uniformCheck.disabled = true;
+                phoneCheck.checked = !!rec.phone;
+                phoneCheck.disabled = true;
+
+                saveBtn.classList.add('hidden');
+                deleteBtn.classList.add('hidden');
+                notice.classList.remove('hidden');
+            } else {
+                timeInput.value = rec && rec.time && rec.time !== '-' ? rec.time : '09:00';
+                timeInput.disabled = false;
+                uniformCheck.checked = rec ? !!rec.noUniform : false;
+                uniformCheck.disabled = false;
+                phoneCheck.checked = rec ? !!rec.phone : false;
+                phoneCheck.disabled = false;
+
+                saveBtn.classList.remove('hidden');
+                if (dbState.currentUser.role === 'manager') {
+                    deleteBtn.classList.remove('hidden');
+                } else {
+                    deleteBtn.classList.add('hidden');
+                }
+                notice.classList.add('hidden');
+            }
+
+            document.getElementById('editDayModal').classList.remove('hidden');
+            document.getElementById('editDayModal').classList.add('flex');
+        };
+
+        window.closeEditModal = function() {
+            document.getElementById('editDayModal').classList.add('hidden');
+            document.getElementById('editDayModal').classList.remove('flex');
+        };
+
+        window.saveEditedDay = async function() {
+            const empId = dbState.currentUser.role === 'manager' ? managerSelectedEmpId : dbState.currentUser.id;
+            const key = `${empId}_${activeEditingDateStr}`;
+
+            if (dbState.currentUser.role === 'employee' && dbState.attendance[key] && dbState.attendance[key].time) {
+                alert("Ushbu sana uchun ma'lumot allaqachon kiritilgan va uni o'zgartirib bo'lmaydi!");
+                return;
+            }
+
+            const time = document.getElementById('modalEditTime').value;
+            const noUniform = document.getElementById('modalEditUniform').checked;
+            const phone = document.getElementById('modalEditPhone').checked;
+
+            dbState.attendance[key] = { time, noUniform, phone };
+            await saveCloudDb();
+
+            window.closeEditModal();
+            renderDashboard();
+            renderDavomatTable();
+            alert(`${activeEditingDateStr} sanasiga ma'lumot saqlandi! ✅`);
+        };
+
+        window.clearDayRecord = async function() {
+            if (dbState.currentUser.role !== 'manager') return;
+
+            const empId = managerSelectedEmpId;
+            const key = `${empId}_${activeEditingDateStr}`;
+            delete dbState.attendance[key];
+            await saveCloudDb();
+
+            window.closeEditModal();
+            renderDashboard();
+            renderDavomatTable();
+            alert(`${activeEditingDateStr} sanasi ma'lumotlari tozalandi! 🧹`);
+        };
+
+        function renderDavomatTable() {
+            const tbody = document.getElementById('detailedDavomatTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const empId = dbState.currentUser && dbState.currentUser.role === 'manager' ? managerSelectedEmpId : (dbState.currentUser ? dbState.currentUser.id : '1');
+            const selectedEmp = dbState.employees.find(e => e.id === empId);
+
+            if (dbState.currentUser && dbState.currentUser.role === 'manager' && selectedEmp) {
+                document.getElementById('davomatSubtitleText').textContent = `${selectedEmp.name} uchun kunlik kelish vaqtlari va jarimalar hisobi`;
+            } else {
+                document.getElementById('davomatSubtitleText').textContent = `Kunlik kelish vaqtlaringiz va jarimalaringiz hisobi`;
+            }
+
+            const year = selectedDate.getFullYear();
+            const month = selectedDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const res = calculateDay(empId, dateStr);
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-slate-900 cursor-pointer text-blue-600 hover:underline" onclick="window.openEditDayModal('${dateStr}')">${dateStr} ✏️</td>
+                    <td class="p-3 font-bold text-slate-600">${res.time || '-'}</td>
+                    <td class="p-3">
+                        ${res.uniformFine ? '<span class="px-2 py-0.5 bg-rose-50 text-rose-600 rounded-lg text-[11px] font-bold">Kiymagan (-1/3)</span>' : '<span class="text-emerald-600">Kiydi</span>'}
+                    </td>
+                    <td class="p-3">
+                        ${res.phoneFine ? '<span class="px-2 py-0.5 bg-rose-50 text-rose-600 rounded-lg text-[11px] font-bold">Ishlatgan (-1/3)</span>' : '<span class="text-emerald-600">Ishlatmadi</span>'}
+                    </td>
+                    <td class="p-3">
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-extrabold ${res.isOff ? 'bg-slate-100 text-slate-400' : res.status.includes('kelmadi') ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-700'}">
+                            ${res.status}
+                        </span>
+                    </td>
+                    <td class="p-3 text-right font-extrabold text-emerald-600">${Math.round(res.earned).toLocaleString()} so'm</td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        window.changeDate = function(delta) {
+            selectedDate.setMonth(selectedDate.getMonth() + delta);
+            renderDashboard();
+            renderDavomatTable();
+        };
+
+        function renderEmployeesTable() {
+            if (!dbState.currentUser || dbState.currentUser.role !== 'manager') return;
+
+            const tbody = document.getElementById('managerEmployeesTable');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            dbState.employees.forEach(emp => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-slate-900">${emp.name} <span class="text-slate-400 text-xs">(${emp.username})</span></td>
+                    <td class="p-3 font-mono text-slate-500">${emp.pass}</td>
+                    <td class="p-3">
+                        <input type="number" value="${emp.wage}" onchange="window.updateEmployeeWage('${emp.id}', this.value)" class="w-28 px-2.5 py-1 rounded-lg border border-slate-200 font-bold bg-slate-50 text-xs text-emerald-700 outline-none focus:ring-2 focus:ring-blue-500">
+                    </td>
+                    <td class="p-3">
+                        <input type="time" value="${emp.customTime || '09:00'}" onchange="window.updateEmployeeTime('${emp.id}', this.value)" class="px-2 py-1 rounded-lg border border-slate-200 font-bold bg-slate-50 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                    </td>
+                    <td class="p-3">
+                        ${emp.isStudent ? `<span class="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-extrabold">Talaba</span>` : '<span class="text-slate-300">Oddiy</span>'}
+                    </td>
+                    <td class="p-3 text-right">
+                        <button onclick="window.deleteEmployee('${emp.id}')" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.updateEmployeeWage = async function(empId, newWage) {
+            if (!dbState.currentUser || dbState.currentUser.role !== 'manager') return;
+            const emp = dbState.employees.find(e => e.id === empId);
+            if (emp) {
+                emp.wage = Number(newWage);
+                await saveCloudDb();
+                renderDashboard();
+                renderDavomatTable();
+                alert(`${emp.name} uchun kunlik maosh ${Number(newWage).toLocaleString()} so'mga o'zgartirildi! ✅`);
+            }
+        };
+
+        window.updateEmployeeTime = async function(empId, newTime) {
+            if (!dbState.currentUser || dbState.currentUser.role !== 'manager') return;
+            const emp = dbState.employees.find(e => e.id === empId);
+            if (emp) {
+                emp.customTime = newTime;
+                await saveCloudDb();
+                alert(`${emp.name} uchun kelish vaqti ${newTime} ga o'zgartirildi! ✅`);
+            }
+        };
+
+        window.openAddModal = function() {
+            if (!dbState.currentUser || dbState.currentUser.role !== 'manager') return;
+            document.getElementById('addEmployeeModal').classList.remove('hidden');
+            document.getElementById('addEmployeeModal').classList.add('flex');
+        };
+
+        window.closeAddModal = function() {
+            document.getElementById('addEmployeeModal').classList.add('hidden');
+            document.getElementById('addEmployeeModal').classList.remove('flex');
+        };
+
+        window.saveNewEmployee = async function() {
+            if (!dbState.currentUser || dbState.currentUser.role !== 'manager') return;
+
+            const name = document.getElementById('modalEmpName').value.trim();
+            const pass = document.getElementById('modalEmpPass').value.trim();
+            const wage = Number(document.getElementById('modalEmpWage').value);
+            const customTime = document.getElementById('modalCustomTime').value;
+            const isStudent = document.getElementById('modalIsStudent').checked;
+
+            if (!name || !pass || !wage) return alert('Barcha kataklarni to\'ldiring!');
+
+            const newEmp = {
+                id: Date.now().toString(),
+                username: name.toLowerCase().replace(/\s+/g, ''),
+                name: name,
+                pass: pass,
+                wage: wage,
+                isStudent: isStudent,
+                customTime: customTime || '09:00'
+            };
+
+            dbState.employees.push(newEmp);
+            await saveCloudDb();
+            window.closeAddModal();
+            renderEmployeesTable();
+            populateEmployeeDropdowns();
+            alert('Yangi xodim qo\'shildi! ✅');
+        };
+
+        window.deleteEmployee = async function(id) {
+            if (!dbState.currentUser || dbState.currentUser.role !== 'manager') return;
+
+            if (confirm('Xodimni o\'chirishni tasdiqlaysizmi?')) {
+                dbState.employees = dbState.employees.filter(e => e.id !== id);
+                await saveCloudDb();
+                renderEmployeesTable();
+                populateEmployeeDropdowns();
+            }
+        };
+
+        window.changeUserPassword = async function() {
+            const newP = document.getElementById('newPasswordInput').value.trim();
+            if (!newP) return alert('Parol kiriting!');
+
+            if (dbState.currentUser.role === 'manager') {
+                alert('Menejer paroli o\'zgartirildi!');
+            } else {
+                const emp = dbState.employees.find(e => e.id === dbState.currentUser.id);
+                if (emp) {
+                    emp.pass = newP;
+                    await saveCloudDb();
+                }
+                alert('Parolingiz muvaffaqiyatli saqlandi! ✅');
+            }
+            document.getElementById('newPasswordInput').value = '';
+        };
+    </script>
+</body>
+</html>
