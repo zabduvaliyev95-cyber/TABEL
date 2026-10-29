@@ -9,11 +9,11 @@
   <meta name="apple-mobile-web-app-title" content="Tabel" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="format-detection" content="telephone=no" />
-  <title>Profitcontrol Tabel</title>
+  <title>Tabel</title>
   
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2B4C'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='system-ui,Arial' font-weight='800'%3ET%3C/text%3E%3C/svg%3E" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A2B4C'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='system-ui,Arial' font-weight='800'%3ET%3C/text%3E%3C/svg%3E" />
-  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Profitcontrol%20Tabel%22%2C%22short_name%22%3A%22Tabel%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231A2B4C%22%2C%22theme_color%22%3A%22%231A2B4C%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%253E%253Crect%20width%3D'100'%20height%3D'100'%20rx%3D'22'%20fill%3D'%25231A2B4C'%2F%253E%253Ctext%20x%3D'50'%20y%3D'68'%20font-size%3D'55'%20text-anchor%3D'middle'%20fill%3D'white'%20font-family%3D'system-ui'%20font-weight%3D'800'%253ET%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
+  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Tabel%22%2C%22short_name%22%3A%22Tabel%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231A2B4C%22%2C%22theme_color%22%3A%22%231A2B4C%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%253E%253Crect%20width%3D'100'%20height%3D'100'%20rx%3D'22'%20fill%3D'%25231A2B4C'%2F%253E%253Ctext%20x%3D'50'%20y%3D'68'%20font-size%3D'55'%20text-anchor%3D'middle'%20fill%3D'white'%20font-family%3D'system-ui'%20font-weight%3D'800'%253ET%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
 
   <style>
     :root {
@@ -88,7 +88,6 @@
     .stat-box .value { font-size: 1.22rem; font-weight: 800; color: var(--primary); }
     .stat-box .label { font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
     
-    /* Kalendar grid dizayni */
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -152,8 +151,8 @@
   <div id="loginScreen" class="login-screen">
     <div class="login-box">
       <div class="login-logo">T</div>
-      <div class="login-title">Profitcontrol Tabel</div>
-      <div class="login-sub">2026 • Buxgalteriya &amp; Nazorat</div>
+      <div class="login-title">Tabel</div>
+      <div class="login-sub">2026 • Nazorat va Hisob</div>
       <div class="form-group">
         <label>Login</label>
         <input type="text" id="loginUser" placeholder="Loginni kiriting" autocomplete="username" />
@@ -172,7 +171,7 @@
     <div class="header">
       <div class="header-top">
         <div>
-          <h1>Profitcontrol Tabel</h1>
+          <h1>Tabel</h1>
           <div class="user-info" id="headerUser"></div>
           <div class="sync-status" id="syncStatus">● Sinxronlash...</div>
         </div>
@@ -435,7 +434,7 @@
       let count = 0;
       for (let d = 1; d <= dim; d++) {
         const jsDay = new Date(YEAR, month - 1, d).getDay();
-        if (jsDay !== 0) count++; // Faqat yakshanba (0) dam olish
+        if (jsDay !== 0) count++;
       }
       return count;
     }
@@ -542,24 +541,20 @@
       let html = `<div style="margin-bottom:12px;font-weight:700;color:var(--primary)">${UZ_MONTHS[currentMonth]} ${YEAR}</div>`;
       html += `<div class="calendar-grid">`;
       
-      // Hafta kunlari sarlavhasi (Yakshanbadan boshlanadi)
       const weekNames = ["Yak", "Dus", "Ses", "Cho", "Pay", "Jum", "Sha"];
       weekNames.forEach(w => {
         html += `<div class="cal-header-cell">${w}</div>`;
       });
       
-      // Oyning 1-kuni haftaning qaysi kuniga to'g'ri kelishini aniqlaymiz (0 - Yakshanba, 1 - Dushanba...)
       const firstDayIndex = new Date(YEAR, currentMonth - 1, 1).getDay();
       
-      // Bo'sh kataklarni qo'shish
       for (let i = 0; i < firstDayIndex; i++) {
         html += `<div class="day-cell empty"></div>`;
       }
       
-      // Kunlarni chiqarish
       for (let d = 1; d <= dim; d++) {
         const dateObj = new Date(YEAR, currentMonth - 1, d);
-        const jsDay = dateObj.getDay(); // 0 - Yakshanba
+        const jsDay = dateObj.getDay();
         const isSunday = (jsDay === 0);
         const att = monthAtt[d] || {};
         const filled = isAdmin ? Object.keys(att).length : (att[currentUser.empId] ? 1 : 0);
